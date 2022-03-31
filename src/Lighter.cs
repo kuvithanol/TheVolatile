@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RWCustom;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,34 +9,116 @@ namespace TheVolatile
 {
     public class Lighter : Rock
     {
-        public Player owner;
-        bool firstTick = true;
+        public Player player;
+        int timeSinceHold = 0;
+        bool open = false;
+        bool lit = false;
+
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
         {
-            this.owner = player;
+            this.player = player;
+
+
+            CustomAtlases.FetchAtlas("lighterClosed");
+            CustomAtlases.FetchAtlas("lighterOpen");
         }
 
+        
+
+        bool firstTickOfExisting = true;
         public override void Update(bool eu)
         {
-            if (firstTick) {
-                owner.Grab(this, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false);
+            if (firstTickOfExisting) {
+                player.Grab(this, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false);
             }
             base.Update(eu);
-            firstTick = false;
+            firstTickOfExisting = false;
 
-            firstChunk.vel *= 0.8f;
-            firstChunk.pos = Vector2.Lerp(firstChunk.pos, owner.firstChunk.pos, 0.05f);
+            //firstChunk.vel *= 0.8f;
+            //firstChunk.pos = Vector2.Lerp(firstChunk.pos, owner.firstChunk.pos, 0.05f);
+
+
+
+            if (player.input[0].pckp) {
+                timeSinceHold++;
+                if (timeSinceHold > 6) {
+                    open = true;
+                }
+                if (timeSinceHold == 12) {
+                    lit = true;
+                }
+            } else {
+                timeSinceHold = 0;
+                open = false;
+                lit = false;
+            }
         }
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            foreach(FSprite s in sLeaser.sprites) 
-            {
-                s.color = Color.green * Color.gray;
+            Vector2 a = Vector2.Lerp(base.firstChunk.lastPos, base.firstChunk.pos, timeStacker);
+            if (this.vibrate > 0) {
+                a += Custom.DegToVec(UnityEngine.Random.value * 360f) * 2f * UnityEngine.Random.value;
+            }
+            sLeaser.sprites[0].x = a.x - camPos.x;
+            sLeaser.sprites[0].y = a.y - camPos.y;
+            sLeaser.sprites[0].element = open ? new FSprite("lighterOpen").element : new FSprite("lighterClosed").element;
+            sLeaser.sprites[0].rotation = Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), Vector3.Slerp(this.lastRotation, this.rotation, timeStacker));
+
+            RoomCamera.SpriteLeaser playerLeaser = null;
+            foreach (RoomCamera.SpriteLeaser potentialPlayerLeaser in rCam.spriteLeasers) {
+                Debug.Log("hmm yes i found a " + potentialPlayerLeaser.drawableObject.GetType().ToString() + "'s sleaser");
+
+                if(potentialPlayerLeaser.drawableObject is PlayerGraphics p && p.owner == player) {
+                    Debug.Log("foind slime :)");
+                    playerLeaser = potentialPlayerLeaser;
+                }
             }
 
-            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+            Vector2 playerPos = playerLeaser.sprites[0].GetPosition();
+            Vector2 lighterPos = sLeaser.sprites[0].GetPosition();
+
+            if (playerLeaser != null) {
+                Debug.Log("trying to reposition");
+                int s = 0;
+                foreach (Vector2 chunk in new Vector2[] { playerPos, lighterPos }) {
+
+                    mesh.MoveVertice(0 + s * 4, chunk + new Vector2(20, 20));
+                    mesh.MoveVertice(1 + s * 4, chunk + new Vector2(-20, 20));
+                    mesh.MoveVertice(2 + s * 4, chunk + new Vector2(20, -20));
+                    mesh.MoveVertice(3 + s * 4, chunk + new Vector2(-20, -20));
+
+                    s++;
+                }
+            }
+
+            if (slatedForDeletetion || room != rCam.room) {
+                sLeaser.CleanSpritesAndRemove();
+            }
         }
+
+        TriangleMesh mesh;
+        public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            color = Color.green * Color.gray;
+
+            sLeaser.sprites = new FSprite[3];
+            sLeaser.sprites[0] = new FSprite("lighterClosed", true);
+
+            TriangleMesh.Triangle[] tris = new TriangleMesh.Triangle[]
+            {
+            new TriangleMesh.Triangle(0, 1, 2)
+            };
+            TriangleMesh triangleMesh = new TriangleMesh("Futile_White", tris, false, false);
+            sLeaser.sprites[1] = triangleMesh;
+
+            mesh = TriangleMesh.MakeLongMesh(2, false, false);
+            sLeaser.sprites[2] = mesh;
+            mesh.color = Color.green;
+
+            AddToContainer(sLeaser, rCam, null);
+        }
+
     }
 
     public class AbstractLighter : AbstractPhysicalObject

@@ -5,7 +5,7 @@ using System.Reflection;
 using UnityEngine;
 using System.IO;
 
-namespace DragonSlayer
+namespace TheVolatile
 {
     internal static class CustomAtlases
     {
@@ -24,6 +24,7 @@ namespace DragonSlayer
         {
             Assembly asm = Assembly.GetExecutingAssembly();
 
+            
             // Load image from resources
             Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
             {

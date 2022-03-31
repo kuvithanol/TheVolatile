@@ -3,8 +3,25 @@
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
     <LangVersion>7.3</LangVersion>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Atlases\lighterClosed.png" />
+    <None Remove="Atlases\lighterClosed.txt" />
+    <None Remove="Atlases\lighterOpen.png" />
+    <None Remove="Atlases\lighterOpen.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Atlases\lighterClosed.png" />
+    <EmbeddedResource Include="Atlases\lighterClosed.txt" />
+    <EmbeddedResource Include="Atlases\lighterOpen.png" />
+    <EmbeddedResource Include="Atlases\lighterOpen.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <XamlAppDef Include="Atlases\lighterOpen.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
@@ -31,10 +48,6 @@
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\RWreferences\UnityEngine.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Atlases\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

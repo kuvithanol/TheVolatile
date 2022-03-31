@@ -20,6 +20,7 @@ namespace TheVolatile
         {
             orig(self, abstractCreature, world);
             if (IsMe(self)) {
+
                 self.bounce = 0.6f;
 
                 AbstractLighter abstractLighter = new AbstractLighter(self.room.world, null, self.abstractCreature.pos, self.room.world.game.GetNewID(), self);
