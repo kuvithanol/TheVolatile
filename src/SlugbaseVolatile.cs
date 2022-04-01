@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using RWCustom;
 
 namespace TheVolatile
 {
@@ -11,6 +12,7 @@ namespace TheVolatile
         public SlugbaseVolatile() : base("The Volatile", FormatVersion.V1, 0, true)
         {
             On.Player.ctor += Player_ctor;
+            On.Player.Update += Player_Update;
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
@@ -25,6 +27,36 @@ namespace TheVolatile
 
                 AbstractLighter abstractLighter = new AbstractLighter(self.room.world, null, self.abstractCreature.pos, self.room.world.game.GetNewID(), self);
                 abstractLighter.RealizeInRoom();
+            }
+        }
+
+        private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
+        {
+            orig(self, eu);
+            if (IsMe(self)) {
+                Lighter l = Lighter.getMine(self);
+                if (l != null && (!(self.grasps[0]?.grabbed == l || self.grasps[1]?.grabbed == l))) {
+                    Vector2 playerLoc = self.firstChunk.pos;
+                    Vector2 lighterLoc = l.firstChunk.pos;
+                    float ropeLength = 40f;
+                    float elasticity = 0.2f;
+                    float dist = Vector2.Distance(self.bodyChunks[1].pos, l.firstChunk.pos);
+
+                    if (dist < 20) {
+                        elasticity = 0;
+                    }
+                    if (dist > ropeLength) {
+                        dist -= ropeLength;
+                        elasticity *= 1 + dist * 0.5f;
+                    }
+                    float ratio = self.bodyChunks[1].mass / (l.firstChunk.mass + self.bodyChunks[1].mass);
+                    Vector2 motionDir = Custom.DirVec(playerLoc, lighterLoc);
+                    self.firstChunk.pos += motionDir * (1f - ratio) * elasticity * 0.2f;
+                    self.firstChunk.vel += motionDir * (1f - ratio) * elasticity * 0.2f;
+                    motionDir = Custom.DirVec(lighterLoc, playerLoc);
+                    l.firstChunk.pos += motionDir * ratio * elasticity;
+                    l.firstChunk.vel += motionDir * ratio * elasticity;
+                }
             }
         }
 

@@ -13,16 +13,25 @@ namespace TheVolatile
         int timeSinceHold = 0;
         bool open = false;
         bool lit = false;
+        static List<Lighter> allLighters = new List<Lighter>();
 
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
         {
             this.player = player;
-
+            allLighters.Add(this);
 
             CustomAtlases.FetchAtlas("lighterClosed");
             CustomAtlases.FetchAtlas("lighterOpen");
         }
-
+        public static Lighter getMine(Player p)
+        {
+            foreach(Lighter lighter in allLighters) {
+                if(lighter.player == p) {
+                    return lighter;
+                }
+            }
+            return null;
+        }
         
 
         bool firstTickOfExisting = true;
@@ -33,11 +42,6 @@ namespace TheVolatile
             }
             base.Update(eu);
             firstTickOfExisting = false;
-
-            //firstChunk.vel *= 0.8f;
-            //firstChunk.pos = Vector2.Lerp(firstChunk.pos, owner.firstChunk.pos, 0.05f);
-
-
 
             if (player.input[0].pckp) {
                 timeSinceHold++;
