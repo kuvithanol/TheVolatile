@@ -39,6 +39,12 @@
     <Reference Include="HOOKS-Assembly-CSharp">
       <HintPath>..\..\..\RWreferences\HOOKS-Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\..\rwbeplibs\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\..\..\rwbeplibs\MonoMod.Utils.dll</HintPath>
+    </Reference>
     <Reference Include="Partiality">
       <HintPath>..\..\..\RWreferences\Partiality.dll</HintPath>
     </Reference>

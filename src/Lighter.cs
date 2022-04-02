@@ -12,7 +12,7 @@ namespace TheVolatile
         public Player player;
         int timeSinceHold = 0;
         bool open = false;
-        bool lit = false;
+        public bool lit = false;
         static List<Lighter> allLighters = new List<Lighter>();
 
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
@@ -58,6 +58,21 @@ namespace TheVolatile
             }
         }
 
+        public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
+        {
+            if (!lit)
+                base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
+            else {
+                if (player.CurrentFood != 0) {
+                    room.AddObject(new Explosion(room, this, firstChunk.pos, 2, 40, 5, 0, 0, 0, thrownBy, 0, 0, 0));
+                    room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, firstChunk.pos, 3.5f, 0.8f);
+                    room.PlaySound(SoundID.Bomb_Explode, firstChunk.pos, 0.5f, 1.2f);
+                } else {
+                    room.PlaySound(SoundID.Snail_Pop, firstChunk);
+                }
+            }
+        }
+
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             Vector2 a = Vector2.Lerp(base.firstChunk.lastPos, base.firstChunk.pos, timeStacker);
@@ -71,10 +86,8 @@ namespace TheVolatile
 
             RoomCamera.SpriteLeaser playerLeaser = null;
             foreach (RoomCamera.SpriteLeaser potentialPlayerLeaser in rCam.spriteLeasers) {
-                Debug.Log("hmm yes i found a " + potentialPlayerLeaser.drawableObject.GetType().ToString() + "'s sleaser");
 
                 if(potentialPlayerLeaser.drawableObject is PlayerGraphics p && p.owner == player) {
-                    Debug.Log("foind slime :)");
                     playerLeaser = potentialPlayerLeaser;
                 }
             }

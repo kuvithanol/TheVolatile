@@ -3,19 +3,98 @@ using System;
 using System.Linq;
 using UnityEngine;
 using RWCustom;
+using MonoMod.Cil;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 namespace TheVolatile
 {
     public class SlugbaseVolatile : SlugBaseCharacter
     {
         static System.Random r = new System.Random();
-        public SlugbaseVolatile() : base("The Volatile", FormatVersion.V1, 0, true)
+        public SlugbaseVolatile() : base("The Volatile", FormatVersion.V1, 0, true) 
         {
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
+            On.Creature.Violence += Creature_Violence;
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
+            On.Player.ThrowObject += Player_ThrowObject;
+            IL.Player.ThrowObject += IL_Player_ThrowObject;
+
+        }
+
+        private void Player_ThrowObject(On.Player.orig_ThrowObject orig, Player self, int grasp, bool eu)
+        {
+            orig(self, grasp, eu);
+
+            if (notPrimedLighter(self, self.grasps[grasp].grabbed)) {
+                self.ReleaseGrasp(grasp);
+            }
+        }
+
+        bool notPrimedLighter(Player p, PhysicalObject l)
+        {
+            if (IsMe(p) && l is Lighter lig && lig.lit) {
+
+                p.AddFood(-1);
+                foreach (var cam in p.room.game.cameras)
+                    if (cam.hud.owner == p && cam.hud.foodMeter is HUD.FoodMeter fm && fm.showCount > 0)
+                        fm.circles[--fm.showCount].EatFade();
+
+
+                return false;
+            }
+            return true;
+        }
+
+        private void IL_Player_ThrowObject(MonoMod.Cil.ILContext il)
+        {
+            Debug.Log("ilhook START");
+            ILCursor baba = new ILCursor(il);
+            ILCursor keke = new ILCursor(il);
+
+
+            //Plugin.logger.Log(BepInEx.Logging.LogLevel.Warning, "First IL:\n" + il);
+            //Debug.Log(baba);
+
+            baba.GotoNext(
+                x => x.MatchLdarg(0),
+                x => x.MatchLdarg(1),
+                x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp")); //baba marks the target IL chunk
+            //Debug.Log(baba);
+
+            keke.GotoNext(
+                x => x.MatchRet());
+            ILLabel oldret = keke.DefineLabel();
+            oldret = keke.MarkLabel();
+            //Debug.Log(keke);
+
+            baba.RemoveRange(3); //baba removes the target IL chunk
+            //Plugin.logger.Log(BepInEx.Logging.LogLevel.Warning, "Remove3 IL:\n" + il);
+
+            ILLabel newret = baba.DefineLabel();
+            newret = baba.MarkLabel();
+            //Debug.Log(baba);
+
+#warning make this not an out when you get the chance!
+            baba.GotoPrev(
+                x => x.MatchBrfalse(out oldret)); 
+            //Debug.Log(baba);
+
+            baba.Remove();
+            //Plugin.logger.Log(BepInEx.Logging.LogLevel.Warning, "CullBR IL:\n" + il);
+
+            baba.Emit(OpCodes.Brfalse, newret);
+            //Plugin.logger.Log(BepInEx.Logging.LogLevel.Warning, "ReplaceBR IL:\n" + il);
+        }
+
+        private void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
+        {
+            if(self is Player p && IsMe(p) && type == Creature.DamageType.Explosion) {
+                orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, 0, 0);
+            } else orig(self,source,directionAndMomentum,hitChunk,hitAppendage,type,damage,stunBonus);
         }
 
         private void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
