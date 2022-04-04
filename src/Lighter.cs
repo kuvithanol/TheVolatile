@@ -13,6 +13,8 @@ namespace TheVolatile
         int timeSinceHold = 0;
         bool open = false;
         public bool lit = false;
+        int delay = 0;
+        const int resetDelay = 40;
         static List<Lighter> allLighters = new List<Lighter>();
 
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
@@ -45,10 +47,10 @@ namespace TheVolatile
 
             if (player.input[0].pckp) {
                 timeSinceHold++;
-                if (timeSinceHold > 6) {
+                if (timeSinceHold > 10) {
                     open = true;
                 }
-                if (timeSinceHold == 12) {
+                if (open && delay == 0 && (player.FoodInStomach > 0)) {
                     lit = true;
                 }
             } else {
@@ -56,6 +58,8 @@ namespace TheVolatile
                 open = false;
                 lit = false;
             }
+
+            if (delay != 0) delay--;
         }
 
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
@@ -63,14 +67,41 @@ namespace TheVolatile
             if (!lit)
                 base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
             else {
-                if (player.CurrentFood != 0) {
-                    room.AddObject(new Explosion(room, this, firstChunk.pos, 2, 40, 5, 0, 0, 0, thrownBy, 0, 0, 0));
-                    room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, firstChunk.pos, 3.5f, 0.8f);
-                    room.PlaySound(SoundID.Bomb_Explode, firstChunk.pos, 0.5f, 1.2f);
-                } else {
-                    room.PlaySound(SoundID.Snail_Pop, firstChunk);
-                }
+                Debug.Log("lit throw");
+                delay = resetDelay;
+                reduceFood();
+                Debug.Log("lit food");
+
+                Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
+                Debug.Log("lit pos");
+
+                float X = player.input[0].x;
+                float Y = player.input[0].y;
+
+                if (gravity != 0 || firstChunk.submersion > 0.9f) pos -= new Vector2(X * 0.3f, (Y >= 0) ? 1.7f : -1.7f) * 10f;
+                else
+                    pos -= new Vector2(X, Y) * 10f;
+                Debug.Log("lit veccheck");
+
+                room.AddObject(new Explosion(room, null, pos, 2, 40, 5, 0, 0, 0, player, 0, 0, 0));
+                room.AddObject(new ExplosionSpikes(room, pos, 10, 0.5f, 2, 5, 15, SlugbaseVolatile.instance.volatileColor(player)[0]));
+                room.AddObject(new Explosion.ExplosionLight(pos, 280f, 0.7f, 7, SlugbaseVolatile.instance.volatileColor(player)[0]));
+                room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player)[0], SlugbaseVolatile.instance.volatileColor(player)[1], UnityEngine.Random.Range(3, 11)));
+                room.AddObject(new SootMark(room, pos, 50, false));
+                Debug.Log("lit spawns");
+
+                room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 3.5f, 0.8f);
+                room.PlaySound(SoundID.Bomb_Explode, pos, 0.5f, 1.2f);
+                Debug.Log("lit toss");
             }
+        }
+
+        void reduceFood()
+        {
+            player.AddFood(-1);
+            foreach (var cam in player.room.game.cameras)
+                if (cam.hud.owner == player && cam.hud.foodMeter is HUD.FoodMeter fm && fm.showCount > 0)
+                    fm.circles[--fm.showCount].EatFade();
         }
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -83,6 +114,7 @@ namespace TheVolatile
             sLeaser.sprites[0].y = a.y - camPos.y;
             sLeaser.sprites[0].element = open ? new FSprite("lighterOpen").element : new FSprite("lighterClosed").element;
             sLeaser.sprites[0].rotation = Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), Vector3.Slerp(this.lastRotation, this.rotation, timeStacker));
+            sLeaser.sprites[0].color = SlugbaseVolatile.instance.volatileColor(player)[1];
 
             RoomCamera.SpriteLeaser playerLeaser = null;
             foreach (RoomCamera.SpriteLeaser potentialPlayerLeaser in rCam.spriteLeasers) {
@@ -92,20 +124,23 @@ namespace TheVolatile
                 }
             }
 
-            Vector2 playerPos = playerLeaser.sprites[0].GetPosition();
-            Vector2 lighterPos = sLeaser.sprites[0].GetPosition();
 
             if (playerLeaser != null) {
-                Debug.Log("trying to reposition");
+                Vector2 A = playerLeaser.sprites[0].GetPosition();
+                Vector2 B = sLeaser.sprites[0].GetPosition();
+
+                Vector2 perpTheta = new Vector2((A - B).y, -(A - B).x).normalized;
+                float bonus = Mathf.Lerp(0.7f, 0.1f, Mathf.InverseLerp(1, 7, Vector2.Distance(A, B) / 20));
+
                 int s = 0;
-                foreach (Vector2 chunk in new Vector2[] { playerPos, lighterPos }) {
+                for (int i = 0; i <= 7; i++) {
+                    Vector2 haver = Vector2.Lerp(A, B, i/7f);
 
-                    mesh.MoveVertice(0 + s * 4, chunk + new Vector2(20, 20));
-                    mesh.MoveVertice(1 + s * 4, chunk + new Vector2(-20, 20));
-                    mesh.MoveVertice(2 + s * 4, chunk + new Vector2(20, -20));
-                    mesh.MoveVertice(3 + s * 4, chunk + new Vector2(-20, -20));
+                    /*top*/
+                    mesh.MoveVertice(i * 2, (haver + sagPer(i) * bonus * new Vector2(0,-20)) + (perpTheta * 10 * plumpPer(i) * bonus));
+                    /*bot*/
+                    mesh.MoveVertice(i * 2 + 1, (haver + sagPer(i) * bonus * new Vector2(0, -20)) - (perpTheta * 10 * plumpPer(i) * bonus));
 
-                    s++;
                 }
             }
 
@@ -114,10 +149,47 @@ namespace TheVolatile
             }
         }
 
+        float sagPer(int i)
+        {
+            switch (i) {
+                case 0:
+                case 7: return 0;
+
+                case 1:
+                case 6: return .4f;
+
+                case 2:
+                case 5: return .6f;
+
+                case 3:
+                case 4: return .7f;
+
+                default: return 0;
+            }
+        }
+        float plumpPer(int i)
+        {
+            switch (i) {
+                case 0:
+                case 7: return 1;
+
+                case 1:
+                case 6: return .9f;
+
+                case 2:
+                case 5: return .8f;
+
+                case 3:
+                case 4: return .75f;
+
+                default: return 1;
+            }
+        }
+
         TriangleMesh mesh;
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
-            color = Color.green * Color.gray;
+            color = SlugbaseVolatile.instance.volatileColor(player)[1];
 
             sLeaser.sprites = new FSprite[3];
             sLeaser.sprites[0] = new FSprite("lighterClosed", true);
@@ -126,12 +198,29 @@ namespace TheVolatile
             {
             new TriangleMesh.Triangle(0, 1, 2)
             };
-            TriangleMesh triangleMesh = new TriangleMesh("Futile_White", tris, false, false);
+            TriangleMesh triangleMesh = new TriangleMesh("Futile_White", tris, false);
             sLeaser.sprites[1] = triangleMesh;
 
-            mesh = TriangleMesh.MakeLongMesh(2, false, false);
+            tris = new TriangleMesh.Triangle[]
+            {
+            new TriangleMesh.Triangle(0, 1, 2),
+            new TriangleMesh.Triangle(1, 2, 3),
+            new TriangleMesh.Triangle(2, 3, 4),
+            new TriangleMesh.Triangle(3, 4, 5),
+            new TriangleMesh.Triangle(4, 5, 6),
+            new TriangleMesh.Triangle(5, 6, 7),
+            new TriangleMesh.Triangle(6, 7, 8),
+            new TriangleMesh.Triangle(7, 8, 9),
+            new TriangleMesh.Triangle(8, 9, 10),
+            new TriangleMesh.Triangle(9, 10,11),
+            new TriangleMesh.Triangle(10,11,12),
+            new TriangleMesh.Triangle(11,12,13),
+            new TriangleMesh.Triangle(12,13,14),
+            new TriangleMesh.Triangle(13,14,15)
+            };
+            mesh = new TriangleMesh("Futile_White", tris, false);
             sLeaser.sprites[2] = mesh;
-            mesh.color = Color.green;
+            mesh.color = SlugbaseVolatile.instance.volatileColor(player)[0];
 
             AddToContainer(sLeaser, rCam, null);
         }

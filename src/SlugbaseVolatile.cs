@@ -12,8 +12,11 @@ namespace TheVolatile
     public class SlugbaseVolatile : SlugBaseCharacter
     {
         static System.Random r = new System.Random();
+        public static SlugbaseVolatile instance;
+
         public SlugbaseVolatile() : base("The Volatile", FormatVersion.V1, 0, true) 
         {
+            instance = this;
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
             On.Creature.Violence += Creature_Violence;
@@ -29,29 +32,23 @@ namespace TheVolatile
         {
             orig(self, grasp, eu);
 
-            if (notPrimedLighter(self, self.grasps[grasp].grabbed)) {
+            if (!primedLighter(self, self.grasps[grasp].grabbed)) {
                 self.ReleaseGrasp(grasp);
             }
         }
 
-        bool notPrimedLighter(Player p, PhysicalObject l)
+        bool primedLighter(Player p, PhysicalObject l)
         {
             if (IsMe(p) && l is Lighter lig && lig.lit) {
-
-                p.AddFood(-1);
-                foreach (var cam in p.room.game.cameras)
-                    if (cam.hud.owner == p && cam.hud.foodMeter is HUD.FoodMeter fm && fm.showCount > 0)
-                        fm.circles[--fm.showCount].EatFade();
-
-
-                return false;
+                lig.lit = false;
+                return true;
             }
-            return true;
+            return false;
         }
 
         private void IL_Player_ThrowObject(MonoMod.Cil.ILContext il)
         {
-            Debug.Log("ilhook START");
+            //Debug.Log("ilhook START");
             ILCursor baba = new ILCursor(il);
             ILCursor keke = new ILCursor(il);
 
@@ -102,7 +99,7 @@ namespace TheVolatile
             orig(self, abstractCreature, world);
             if (IsMe(self)) {
 
-                self.bounce = 0.6f;
+                self.bounce = 0.4f;
 
                 AbstractLighter abstractLighter = new AbstractLighter(self.room.world, null, self.abstractCreature.pos, self.room.world.game.GetNewID(), self);
                 abstractLighter.RealizeInRoom();
@@ -193,7 +190,7 @@ namespace TheVolatile
                 int i = 0; foreach (FSprite oldSprite in sLeaser.sprites) {
                     FSprite newSprite = new FSprite(oldSprite.element);
 
-                    newSprite.color = Color.green;
+                    newSprite.color = volatileColor(self.player)[1];
                     newSprite.SetPosition(oldSprite.GetPosition());
                     newSprite.scale = 1.5f;
                     fContainer.AddChild(newSprite);
@@ -211,5 +208,35 @@ namespace TheVolatile
 
 
         public override string Description => "farded";
+
+        public Color[] volatileColor(Player p)
+        {
+            Color[] ret = new Color[2];
+            ret[0] = (Color)SlugcatColor(p.playerState.playerNumber, Color.white);
+            ret[1] = (Color)SlugcatEyeColor(p.playerState.playerNumber);
+            return ret;
+        }
+
+        public override Color? SlugcatColor(int slugcatCharacter, Color baseColor)
+        {
+            switch (slugcatCharacter) {
+                case 0: return Color.green;
+                case 1: return new Color(1, 0.5f, 0);
+                case 2: return Color.cyan;
+                case 3: return Color.Lerp(Color.magenta, Color.gray, 0.4f);
+                default: return Color.green;
+            }
+        }
+
+        public override Color? SlugcatEyeColor(int slugcatCharacter)
+        {
+            switch (slugcatCharacter) {
+                case 0: return Color.Lerp(Color.green, Color.black, 0.5f);
+                case 1: return Color.yellow;
+                case 2: return Color.blue;
+                case 3: return Color.white;
+                default: return Color.green;
+            }
+        }
     }
 }
