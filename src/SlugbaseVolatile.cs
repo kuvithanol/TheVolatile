@@ -6,6 +6,8 @@ using RWCustom;
 using MonoMod.Cil;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
+using System.Reflection;
+using System.IO;
 
 namespace TheVolatile
 {
@@ -103,8 +105,30 @@ namespace TheVolatile
 
                 AbstractLighter abstractLighter = new AbstractLighter(self.room.world, null, self.abstractCreature.pos, self.room.world.game.GetNewID(), self);
                 abstractLighter.RealizeInRoom();
+
+                self.abstractCreature.stuckObjects.Add(new LighterStick(abstractCreature, abstractLighter));
             }
         }
+        private class LighterStick : AbstractPhysicalObject.AbstractObjectStick
+        {
+            public LighterStick(AbstractPhysicalObject A, AbstractPhysicalObject B) : base(A, B)
+            {
+
+            }
+
+            public override string SaveToString(int roomIndex)
+            {
+                return string.Concat(new string[]
+                {
+                roomIndex.ToString(),
+                "<stkA>gripGoob<stkA>",
+                this.A.ID.ToString(),
+                "<stkA>",
+                this.B.ID.ToString()
+                });
+            }
+        }
+
 
         private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
@@ -207,7 +231,7 @@ namespace TheVolatile
         }
 
 
-        public override string Description => "farded";
+        public override string Description => "this cat is s";
 
         public Color[] volatileColor(Player p)
         {
@@ -237,6 +261,41 @@ namespace TheVolatile
                 case 3: return Color.white;
                 default: return Color.green;
             }
+        }
+
+        public override float? GetCycleLength()
+        {
+            return Mathf.Lerp(6, 8, UnityEngine.Random.value);
+        }
+
+        protected override void GetStats(SlugcatStats stats)
+        {
+            stats.throwingSkill = 0;
+            stats.lungsFac = 0.1f;
+            stats.runspeedFac *= 0.9f;
+        }
+
+        public override void GetFoodMeter(out int maxFood, out int foodToSleep)
+        {
+            maxFood = 6;
+            foodToSleep = 3;
+        }
+
+        public override Stream GetResource(params string[] path)
+        {
+            var patchedPath = new string[path.Length];
+            for (int i = path.Length - 1; i > -1; i--) patchedPath[i] = path[i];
+            //this is needed because there are two scenes that have most assets in common, you probably won't have to use it
+
+            if (path[path.Length - 2] == "SelectMenuDisrupt" && path.Last() != "scene.json")
+                patchedPath[path.Length - 2] = "SelectMenu";
+            //join the path parts from new array to get resource name to request
+            string oresname = "TheVolatile.graphics." + string.Join(".", patchedPath);
+            //attempt getting the resource. If name is wrong, null is returned
+            var tryret = Assembly.GetExecutingAssembly().GetManifestResourceStream(oresname);
+            if (tryret != null) Console.WriteLine($"BUILDING SCENE FROM ER: {oresname}");
+            //if tryret is null, it means my name conversion was wrong or that i just didn't have the requested thing, let slugbase deal with it
+            return tryret ?? base.GetResource(path);
         }
     }
 }

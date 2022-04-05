@@ -1,0 +1,30 @@
+{
+	"images": [
+		{
+			"name": "wall.png",
+			"x": 400,
+			"y": 0,
+			"depth": 15,
+			"fade": 0.35
+		},
+		{
+			"name": "mat.png",
+			"x": 400,
+			"y": 0,
+			"depth": 6,
+			"fade": 0.35
+		},
+		{
+			"name": "cat.png",
+			"x": 400,
+			"y": 0,
+			"depth": 4.5
+		},
+		{
+			"name": "foregrass.png",
+			"x": 400,
+			"y": 0,
+			"depth": 3.5
+		}
+	]
+}

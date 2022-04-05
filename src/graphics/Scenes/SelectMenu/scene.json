@@ -1,0 +1,54 @@
+{
+	"images": [
+		{
+			"name": "wall.png",
+			"x": 0,
+			"y": 0,
+			"depth": 8
+		},
+		{
+			"name": "chains.png",
+			"x": 0,
+			"y": 0,
+			"depth": 7
+		},
+		{
+			"name": "floor.png",
+			"x": 0,
+			"y": 0,
+			"depth": 5.5
+		},
+		{
+			"name": "spores.png",
+			"x": 0,
+			"y": 0,
+			"depth": 5.5,
+			"shader": "Overlay"
+		},
+		{
+			"name": "cat.png",
+			"x": 0,
+			"y": 0,
+			"depth": 5,
+			"shader": "LightEdges"
+		},
+		{
+			"name": "greenergrass.png",
+			"x": 0,
+			"y": 0,
+			"depth": 4.25
+		},
+		{
+			"name": "grass.png",
+			"x": 0,
+			"y": 0,
+			"depth": 4.0
+		}
+	],
+	"glowx":730,
+	"glowy":335,
+	"markx":740,
+	"marky":575,
+	"selectmenux":-10,
+	"selectmenuy":100
+}

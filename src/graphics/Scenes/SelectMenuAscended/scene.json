@@ -1,0 +1,10 @@
+{
+	"images": [
+		{ "name":"Ghost.png", "x":507, "y": 289, "depth":2.85},
+		{ "name":"Glow.png" , "x":524, "y": 274, "depth": 2.7, "shader":"Overlay", "alpha":0.7}
+	],
+	"idledepths": [
+		3.1,
+		2.8
+	]
+}

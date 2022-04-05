@@ -9,12 +9,14 @@ namespace TheVolatile
 {
     public class Lighter : Rock
     {
+        System.Random r = new System.Random();
         public Player player;
         int timeSinceHold = 0;
         bool open = false;
         public bool lit = false;
+        bool iveBeenOpen = false;
         int delay = 0;
-        const int resetDelay = 40;
+        const int resetDelay = 20;
         static List<Lighter> allLighters = new List<Lighter>();
 
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
@@ -22,9 +24,13 @@ namespace TheVolatile
             this.player = player;
             allLighters.Add(this);
 
+            soundLoop.sound = SoundID.Fire_Spear_Ignite;
+            soundLoop.Start();
+
             CustomAtlases.FetchAtlas("lighterClosed");
             CustomAtlases.FetchAtlas("lighterOpen");
         }
+
         public static Lighter getMine(Player p)
         {
             foreach(Lighter lighter in allLighters) {
@@ -47,19 +53,32 @@ namespace TheVolatile
 
             if (player.input[0].pckp) {
                 timeSinceHold++;
-                if (timeSinceHold > 10) {
+                if (timeSinceHold > 8) {
                     open = true;
                 }
                 if (open && delay == 0 && (player.FoodInStomach > 0)) {
                     lit = true;
+                    soundLoop.Volume = 1;
                 }
             } else {
                 timeSinceHold = 0;
                 open = false;
                 lit = false;
+                soundLoop.Volume = 0;
+            }
+
+            if(r.Next(3) == 1 && lit) {
+                room.AddObject(new HolyFire.HolyFireSprite(firstChunk.pos + new Vector2(0, 4)));
             }
 
             if (delay != 0) delay--;
+
+            if(!iveBeenOpen && open) {
+                room.PlaySound(SoundID.Snail_Warning_Click, firstChunk.pos, 0.8f, 2f);
+            }
+
+
+            iveBeenOpen = open;
         }
 
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
@@ -67,13 +86,10 @@ namespace TheVolatile
             if (!lit)
                 base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
             else {
-                Debug.Log("lit throw");
                 delay = resetDelay;
                 reduceFood();
-                Debug.Log("lit food");
 
                 Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
-                Debug.Log("lit pos");
 
                 float X = player.input[0].x;
                 float Y = player.input[0].y;
@@ -81,18 +97,15 @@ namespace TheVolatile
                 if (gravity != 0 || firstChunk.submersion > 0.9f) pos -= new Vector2(X * 0.3f, (Y >= 0) ? 1.7f : -1.7f) * 10f;
                 else
                     pos -= new Vector2(X, Y) * 10f;
-                Debug.Log("lit veccheck");
 
                 room.AddObject(new Explosion(room, null, pos, 2, 40, 5, 0, 0, 0, player, 0, 0, 0));
                 room.AddObject(new ExplosionSpikes(room, pos, 10, 0.5f, 2, 5, 15, SlugbaseVolatile.instance.volatileColor(player)[0]));
                 room.AddObject(new Explosion.ExplosionLight(pos, 280f, 0.7f, 7, SlugbaseVolatile.instance.volatileColor(player)[0]));
                 room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player)[0], SlugbaseVolatile.instance.volatileColor(player)[1], UnityEngine.Random.Range(3, 11)));
                 room.AddObject(new SootMark(room, pos, 50, false));
-                Debug.Log("lit spawns");
 
                 room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 3.5f, 0.8f);
-                room.PlaySound(SoundID.Bomb_Explode, pos, 0.5f, 1.2f);
-                Debug.Log("lit toss");
+                room.PlaySound(SoundID.Bomb_Explode, pos, 0.4f, 1.2f);
             }
         }
 
@@ -114,7 +127,6 @@ namespace TheVolatile
             sLeaser.sprites[0].y = a.y - camPos.y;
             sLeaser.sprites[0].element = open ? new FSprite("lighterOpen").element : new FSprite("lighterClosed").element;
             sLeaser.sprites[0].rotation = Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), Vector3.Slerp(this.lastRotation, this.rotation, timeStacker));
-            sLeaser.sprites[0].color = SlugbaseVolatile.instance.volatileColor(player)[1];
 
             RoomCamera.SpriteLeaser playerLeaser = null;
             foreach (RoomCamera.SpriteLeaser potentialPlayerLeaser in rCam.spriteLeasers) {
@@ -132,7 +144,6 @@ namespace TheVolatile
                 Vector2 perpTheta = new Vector2((A - B).y, -(A - B).x).normalized;
                 float bonus = Mathf.Lerp(0.7f, 0.1f, Mathf.InverseLerp(1, 7, Vector2.Distance(A, B) / 20));
 
-                int s = 0;
                 for (int i = 0; i <= 7; i++) {
                     Vector2 haver = Vector2.Lerp(A, B, i/7f);
 
@@ -140,8 +151,13 @@ namespace TheVolatile
                     mesh.MoveVertice(i * 2, (haver + sagPer(i) * bonus * new Vector2(0,-20)) + (perpTheta * 10 * plumpPer(i) * bonus));
                     /*bot*/
                     mesh.MoveVertice(i * 2 + 1, (haver + sagPer(i) * bonus * new Vector2(0, -20)) - (perpTheta * 10 * plumpPer(i) * bonus));
-
                 }
+                mesh.MoveBehindOtherNode(playerLeaser.sprites[9]);
+
+                float x = A.x > B.x ? -1 : 1;
+                mesh.MoveVertice(16, B + bonus * new Vector2(5 * x, 5));
+                mesh.MoveVertice(17, B + bonus * new Vector2(5 * x, -5));
+                mesh.MoveVertice(18, B + bonus * new Vector2(8 * x, 0));
             }
 
             if (slatedForDeletetion || room != rCam.room) {
@@ -187,10 +203,9 @@ namespace TheVolatile
         }
 
         TriangleMesh mesh;
+
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
-            color = SlugbaseVolatile.instance.volatileColor(player)[1];
-
             sLeaser.sprites = new FSprite[3];
             sLeaser.sprites[0] = new FSprite("lighterClosed", true);
 
@@ -216,7 +231,10 @@ namespace TheVolatile
             new TriangleMesh.Triangle(10,11,12),
             new TriangleMesh.Triangle(11,12,13),
             new TriangleMesh.Triangle(12,13,14),
-            new TriangleMesh.Triangle(13,14,15)
+            new TriangleMesh.Triangle(13,14,15),
+            new TriangleMesh.Triangle(14,15,16),
+            new TriangleMesh.Triangle(15,16,17),
+            new TriangleMesh.Triangle(16,17,18)
             };
             mesh = new TriangleMesh("Futile_White", tris, false);
             sLeaser.sprites[2] = mesh;
@@ -225,6 +243,13 @@ namespace TheVolatile
             AddToContainer(sLeaser, rCam, null);
         }
 
+        public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+            color = Color.Lerp(SlugbaseVolatile.instance.volatileColor(player)[1], Color.black, 0.4f) ;
+            sLeaser.sprites[0].color = color;
+            sLeaser.sprites[1].color = color;
+            sLeaser.sprites[2].color = SlugbaseVolatile.instance.volatileColor(player)[0];
+        }
     }
 
     public class AbstractLighter : AbstractPhysicalObject

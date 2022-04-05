@@ -10,6 +10,41 @@
     <None Remove="Atlases\lighterClosed.txt" />
     <None Remove="Atlases\lighterOpen.png" />
     <None Remove="Atlases\lighterOpen.txt" />
+    <None Remove="graphics\Scenes\NewDeath\FlowerA.png" />
+    <None Remove="graphics\Scenes\NewDeath\FlowerA2.png" />
+    <None Remove="graphics\Scenes\NewDeath\FlowerB.png" />
+    <None Remove="graphics\Scenes\NewDeath\FlowerB2.png" />
+    <None Remove="graphics\Scenes\NewDeath\FlowerC.png" />
+    <None Remove="graphics\Scenes\NewDeath\FlowerC2.png" />
+    <None Remove="graphics\Scenes\NewDeath\New Death - 1.png" />
+    <None Remove="graphics\Scenes\NewDeath\New Death - 2.png" />
+    <None Remove="graphics\Scenes\NewDeath\New Death - 3.png" />
+    <None Remove="graphics\Scenes\NewDeath\New Death - 4.png" />
+    <None Remove="graphics\Scenes\NewDeath\New Death - 5.png" />
+    <None Remove="graphics\Scenes\NewDeath\New Death - 55.png" />
+    <None Remove="graphics\Scenes\NewDeath\scene.json" />
+    <None Remove="graphics\Scenes\SelectMenuAscended\Ghost.png" />
+    <None Remove="graphics\Scenes\SelectMenuAscended\Glow.png" />
+    <None Remove="graphics\Scenes\SelectMenuAscended\scene.json" />
+    <None Remove="graphics\Scenes\SelectMenu\cat.png" />
+    <None Remove="graphics\Scenes\SelectMenu\chains.png" />
+    <None Remove="graphics\Scenes\SelectMenu\floor.png" />
+    <None Remove="graphics\Scenes\SelectMenu\grass.png" />
+    <None Remove="graphics\Scenes\SelectMenu\greenergrass.png" />
+    <None Remove="graphics\Scenes\SelectMenu\scene.json" />
+    <None Remove="graphics\Scenes\SelectMenu\spores.png" />
+    <None Remove="graphics\Scenes\SelectMenu\wall.png" />
+    <None Remove="graphics\Scenes\SleepScreen\cat.png" />
+    <None Remove="graphics\Scenes\SleepScreen\foregrass.png" />
+    <None Remove="graphics\Scenes\SleepScreen\mat.png" />
+    <None Remove="graphics\Scenes\SleepScreen\scene.json" />
+    <None Remove="graphics\Scenes\SleepScreen\wall.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerA.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -17,6 +52,34 @@
     <EmbeddedResource Include="Atlases\lighterClosed.txt" />
     <EmbeddedResource Include="Atlases\lighterOpen.png" />
     <EmbeddedResource Include="Atlases\lighterOpen.txt" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerA2.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerB.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerB2.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerC.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerC2.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\New Death - 1.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\New Death - 2.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\New Death - 3.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\New Death - 4.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\New Death - 5.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\New Death - 55.png" />
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\scene.json" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenuAscended\Ghost.png" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenuAscended\Glow.png" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenuAscended\scene.json" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenu\cat.png" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenu\chains.png" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenu\floor.png" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenu\grass.png" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenu\greenergrass.png" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenu\scene.json" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenu\spores.png" />
+    <EmbeddedResource Include="graphics\Scenes\SelectMenu\wall.png" />
+    <EmbeddedResource Include="graphics\Scenes\SleepScreen\cat.png" />
+    <EmbeddedResource Include="graphics\Scenes\SleepScreen\foregrass.png" />
+    <EmbeddedResource Include="graphics\Scenes\SleepScreen\mat.png" />
+    <EmbeddedResource Include="graphics\Scenes\SleepScreen\scene.json" />
+    <EmbeddedResource Include="graphics\Scenes\SleepScreen\wall.png" />
   </ItemGroup>
 
   <ItemGroup>
