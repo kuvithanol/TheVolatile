@@ -8,6 +8,7 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Reflection;
 using System.IO;
+using System.ComponentModel;
 
 namespace TheVolatile
 {
@@ -23,6 +24,7 @@ namespace TheVolatile
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
             On.Creature.Violence += Creature_Violence;
+            On.PlayerGraphics.ctor += PlayerGraphics_ctor;
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
@@ -31,6 +33,14 @@ namespace TheVolatile
             On.Player.CanBeSwallowed += Player_CanBeSwallowed;
             On.Player.Grabability += Player_Grabability;
             On.Player.SlugcatGrab += Player_SlugcatGrab;
+
+            On.GameSession.ctor += GameSession_ctor;
+        }
+
+        private void GameSession_ctor(On.GameSession.orig_ctor orig, GameSession self, RainWorldGame game)
+        {
+            orig(self, game);
+            CustomAtlases.FetchAtlas("Atlas");
         }
 
         private void Player_SlugcatGrab(On.Player.orig_SlugcatGrab orig, Player self, PhysicalObject obj, int graspUsed)
@@ -212,18 +222,22 @@ namespace TheVolatile
                 var myContainer = sLeaser.containers?.FirstOrDefault(x => x.data is string s && s == "slime");
                 if (myContainer == null) return;
 
+                if (!sLeaser.sprites[9].element.name.EndsWith("slime"))
+                    sLeaser.sprites[9].element = new FSprite(sLeaser.sprites[9].element.name + "slime").element;
+                sLeaser.sprites[9].isVisible = true;
+                sLeaser.sprites[9].color = volatileColor(self.player, 1);
+
                 int i = 0;
                 foreach(FSprite vSprite in sLeaser.sprites) {
                     FSprite mSprite = (FSprite)myContainer.GetChildAt(i);
                     if (i == 2 || i == 7 || i == 8 || i == 11 || i == 10) {
                         mSprite.isVisible = false;
                     } else {
-
-
-
                         mSprite.SetPosition(vSprite.GetPosition());
                         mSprite.SetAnchor(vSprite.GetAnchor());
                         mSprite.rotation = vSprite.rotation;
+                        if(vSprite?.element != null)
+                            mSprite.element = vSprite.element;
                     }
                     if(i == 6 || i == 5) {
                         mSprite.isVisible = vSprite.isVisible; // <-----------
@@ -232,6 +246,16 @@ namespace TheVolatile
                     i++;
                 }
             }
+        }
+
+        private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
+        {
+            orig(self, ow);
+
+            self.tail[0] = new TailSegment(self, 8f, 6f, null, 0.85f, 1f, 1f, true);
+            self.tail[1] = new TailSegment(self, 8f, 10f, self.tail[0], 0.85f, 1f, 0.5f, true);
+            self.tail[2] = new TailSegment(self, 5.5f, 10f, self.tail[1], 0.85f, 1f, 0.5f, true);
+            self.tail[3] = new TailSegment(self, 2f, 10f, self.tail[2], 0.85f, 1f, 0.5f, true);
         }
 
         private void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -246,7 +270,7 @@ namespace TheVolatile
                 int i = 0; foreach (FSprite oldSprite in sLeaser.sprites) {
                     FSprite newSprite = new FSprite(oldSprite.element);
 
-                    newSprite.color = volatileColor(self.player)[1];
+                    newSprite.color = volatileColor(self.player,.6f);
                     newSprite.SetPosition(oldSprite.GetPosition());
                     newSprite.scale = 1.5f;
                     fContainer.AddChild(newSprite);
@@ -260,11 +284,8 @@ namespace TheVolatile
 
 
 
-                CustomAtlases.FetchAtlas("OutlineTail");
-                
                 TriangleMesh tailMesh = new TriangleMesh("OutlineTail", (sLeaser.sprites[2] as TriangleMesh).triangles, true) {
-                    color = instance.volatileColor(self.player)[0],
-                    element = new FSprite("OutlineTail").element
+                    color = instance.volatileColor(self.player, 0)
                 };
                 for (int j = tailMesh.vertices.Length - 1; j >= 0; j--) {
                     float num = (float)(j / 2) / (float)(tailMesh.vertices.Length / 2);
@@ -280,11 +301,8 @@ namespace TheVolatile
                     vector.y = Mathf.Lerp(tailMesh.element.uvBottomLeft.y, tailMesh.element.uvTopRight.y, vector.y);
                     tailMesh.UVvertices[j] = vector;
                 }
+                sLeaser.sprites[2] = tailMesh;
 
-                self.tail[0] = new TailSegment(self, 8f, 6f, null, 0.85f, 1f, 1f, true);
-                self.tail[1] = new TailSegment(self, 8f, 10f, self.tail[0], 0.85f, 1f, 0.5f, true);
-                self.tail[2] = new TailSegment(self, 5.5f, 10f, self.tail[1], 0.85f, 1f, 0.5f, true);
-                self.tail[3] = new TailSegment(self, 2f, 10f, self.tail[2], 0.85f, 1f, 0.5f, true);
 
                 sLeaser.AddSpritesToContainer(fContainer, rCam);
             }
@@ -293,12 +311,10 @@ namespace TheVolatile
 
         public override string Description => "this cat is s";
 
-        public Color[] volatileColor(Player p)
+        [Description("0 for the skin color, 1 for the face color")]
+        public Color volatileColor(Player p, float lerp)
         {
-            Color[] ret = new Color[2];
-            ret[0] = (Color)SlugcatColor(p.playerState.playerNumber, Color.white);
-            ret[1] = (Color)SlugcatEyeColor(p.playerState.playerNumber);
-            return ret;
+            return Color.Lerp((Color)SlugcatColor(p.playerState.playerNumber, Color.white), (Color)SlugcatEyeColor(p.playerState.playerNumber), lerp);
         }
 
         public override Color? SlugcatColor(int slugcatCharacter, Color baseColor)

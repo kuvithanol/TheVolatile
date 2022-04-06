@@ -6,12 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Atlases\Atlas.png" />
+    <None Remove="Atlases\Atlas.txt" />
     <None Remove="Atlases\lighterClosed.png" />
     <None Remove="Atlases\lighterClosed.txt" />
     <None Remove="Atlases\lighterOpen.png" />
     <None Remove="Atlases\lighterOpen.txt" />
-    <None Remove="Atlases\OutlineTail.png" />
-    <None Remove="Atlases\OutlineTail.txt" />
     <None Remove="graphics\Scenes\NewDeath\FlowerA.png" />
     <None Remove="graphics\Scenes\NewDeath\FlowerA2.png" />
     <None Remove="graphics\Scenes\NewDeath\FlowerB.png" />
@@ -44,18 +44,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Atlases\OutlineTail.png" />
-    <EmbeddedResource Include="Atlases\OutlineTail.txt" />
+    <EmbeddedResource Include="Atlases\Atlas.png" />
+    <EmbeddedResource Include="Atlases\Atlas.txt" />
     <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerA.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Atlases\lighterClosed.png" />
-    <EmbeddedResource Include="Atlases\lighterClosed.txt" />
-    <EmbeddedResource Include="Atlases\lighterOpen.png" />
-    <EmbeddedResource Include="Atlases\lighterOpen.txt" />
     <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerA2.png" />
     <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerB.png" />
     <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerB2.png" />
@@ -84,10 +80,6 @@
     <EmbeddedResource Include="graphics\Scenes\SleepScreen\mat.png" />
     <EmbeddedResource Include="graphics\Scenes\SleepScreen\scene.json" />
     <EmbeddedResource Include="graphics\Scenes\SleepScreen\wall.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <XamlAppDef Include="Atlases\lighterOpen.png" />
   </ItemGroup>
 
   <ItemGroup>

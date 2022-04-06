@@ -24,7 +24,6 @@ namespace TheVolatile
         {
             Assembly asm = Assembly.GetExecutingAssembly();
 
-            
             // Load image from resources
             Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
             {

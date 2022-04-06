@@ -23,9 +23,6 @@ namespace TheVolatile
 
             soundLoop.sound = SoundID.Fire_Spear_Ignite;
             soundLoop.Start();
-
-            CustomAtlases.FetchAtlas("lighterClosed");
-            CustomAtlases.FetchAtlas("lighterOpen");
         }
 
         public static Lighter getMine(Player p)
@@ -48,7 +45,7 @@ namespace TheVolatile
             base.Update(eu);
             firstTickOfExisting = false;
 
-            if (player.input[0].pckp && player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) {
+            if (player.input[0].pckp && ((player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) || (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this))) {
                 timeSinceClick++;
                 if (timeSinceClick > 8) {
                     open = true;
@@ -100,9 +97,9 @@ namespace TheVolatile
                     pos -= new Vector2(X, Y) * 10f;
 
                 room.AddObject(new Explosion(room, null, pos, 2, 40, 5, 0, 0, 0, player, 0, 0, 0));
-                room.AddObject(new ExplosionSpikes(room, pos, 10, 0.5f, 2, 5, 15, SlugbaseVolatile.instance.volatileColor(player)[0]));
-                room.AddObject(new Explosion.ExplosionLight(pos, 280f, 0.7f, 7, SlugbaseVolatile.instance.volatileColor(player)[0]));
-                room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player)[0], SlugbaseVolatile.instance.volatileColor(player)[1], UnityEngine.Random.Range(3, 11)));
+                room.AddObject(new ExplosionSpikes(room, pos, 10, 0.5f, 2, 5, 15, SlugbaseVolatile.instance.volatileColor(player, 0)));
+                room.AddObject(new Explosion.ExplosionLight(pos, 280f, 0.7f, 7, SlugbaseVolatile.instance.volatileColor(player, 0)));
+                room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player, 0), SlugbaseVolatile.instance.volatileColor(player, 1), UnityEngine.Random.Range(3, 11)));
                 room.AddObject(new SootMark(room, pos, 50, false));
 
                 room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 3.5f, 0.8f);
@@ -128,6 +125,9 @@ namespace TheVolatile
             sLeaser.sprites[0].y = a.y - camPos.y;
             sLeaser.sprites[0].element = open ? new FSprite("lighterOpen").element : new FSprite("lighterClosed").element;
             sLeaser.sprites[0].rotation = Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), Vector3.Slerp(this.lastRotation, this.rotation, timeStacker));
+            sLeaser.sprites[0].scaleX = (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this) ? -1f : 1f;
+
+            sLeaser.sprites[2].isVisible = !(player.grasps[0]?.grabbed is Lighter || player.grasps[1]?.grabbed is Lighter);
 
             RoomCamera.SpriteLeaser playerLeaser = null;
             foreach (RoomCamera.SpriteLeaser potentialPlayerLeaser in rCam.spriteLeasers) {
@@ -143,7 +143,7 @@ namespace TheVolatile
                 Vector2 B = sLeaser.sprites[0].GetPosition();
 
                 Vector2 perpTheta = new Vector2((A - B).y, -(A - B).x).normalized;
-                float bonus = Mathf.Lerp(.7f, .1f, Mathf.InverseLerp(1, 7, Vector2.Distance(A, B) / 20));
+                float bonus = Mathf.Lerp(1f, .3f, Mathf.InverseLerp(1, 7, Vector2.Distance(A, B) / 20));
 
                 for (int i = 0; i <= 7; i++) {
                     Vector2 haver = Vector2.Lerp(A, B, i/7f);
@@ -237,19 +237,45 @@ namespace TheVolatile
             new TriangleMesh.Triangle(15,16,17),
             new TriangleMesh.Triangle(16,17,18)
             };
-            mesh = new TriangleMesh("Futile_White", tris, false);
+            mesh = new TriangleMesh("floobert", tris, true) {
+                color = SlugbaseVolatile.instance.volatileColor(player, 0)
+            }; 
+            for (int j = mesh.vertices.Length - 1; j >= 0; j--) {
+                float num = (float)(j / 2) / (float)(mesh.vertices.Length / 2);
+                Vector2 vector;
+                if (j % 2 == 0) {
+                    vector = new Vector2(num, 0f);
+                } else if (j < mesh.vertices.Length - 1) {
+                    vector = new Vector2(num, 1f);
+                } else {
+                    vector = new Vector2(1f, 0f);
+                }
+                vector.x = Mathf.Lerp(mesh.element.uvBottomLeft.x, mesh.element.uvTopRight.x, vector.x);
+                vector.y = Mathf.Lerp(mesh.element.uvBottomLeft.y, mesh.element.uvTopRight.y, vector.y);
+                mesh.UVvertices[j] = vector;
+            }
             sLeaser.sprites[2] = mesh;
-            mesh.color = SlugbaseVolatile.instance.volatileColor(player)[0];
 
             AddToContainer(sLeaser, rCam, null);
         }
 
+        public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            if (/*newContatiner == null*/ true) {
+                newContatiner = rCam.ReturnFContainer("Background");
+            }
+            for (int i = sLeaser.sprites.Length - 1; i >= 0; i--) {
+                sLeaser.sprites[i].RemoveFromContainer();
+                newContatiner.AddChild(sLeaser.sprites[i]);
+            }
+        }
+
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
-            color = Color.Lerp(SlugbaseVolatile.instance.volatileColor(player)[1], Color.black, 0.4f) ;
+            color = Color.Lerp(SlugbaseVolatile.instance.volatileColor(player, 1), Color.black, 0.4f) ;
             sLeaser.sprites[0].color = color;
             sLeaser.sprites[1].color = color;
-            sLeaser.sprites[2].color = SlugbaseVolatile.instance.volatileColor(player)[0];
+            sLeaser.sprites[2].color = SlugbaseVolatile.instance.volatileColor(player, 0);
         }
     }
 
