@@ -10,6 +10,8 @@
     <None Remove="Atlases\lighterClosed.txt" />
     <None Remove="Atlases\lighterOpen.png" />
     <None Remove="Atlases\lighterOpen.txt" />
+    <None Remove="Atlases\OutlineTail.png" />
+    <None Remove="Atlases\OutlineTail.txt" />
     <None Remove="graphics\Scenes\NewDeath\FlowerA.png" />
     <None Remove="graphics\Scenes\NewDeath\FlowerA2.png" />
     <None Remove="graphics\Scenes\NewDeath\FlowerB.png" />
@@ -42,6 +44,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Atlases\OutlineTail.png" />
+    <EmbeddedResource Include="Atlases\OutlineTail.txt" />
     <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerA.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

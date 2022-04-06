@@ -13,10 +13,11 @@ namespace TheVolatile
 {
     public class SlugbaseVolatile : SlugBaseCharacter
     {
-        static System.Random r = new System.Random();
         public static SlugbaseVolatile instance;
 
-        public SlugbaseVolatile() : base("The Volatile", FormatVersion.V1, 0, true) 
+        
+
+        public SlugbaseVolatile() : base("The Volatile", FormatVersion.V1, 0, true)
         {
             instance = this;
             On.Player.ctor += Player_ctor;
@@ -27,7 +28,38 @@ namespace TheVolatile
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
             On.Player.ThrowObject += Player_ThrowObject;
             IL.Player.ThrowObject += IL_Player_ThrowObject;
+            On.Player.CanBeSwallowed += Player_CanBeSwallowed;
+            On.Player.Grabability += Player_Grabability;
+            On.Player.SlugcatGrab += Player_SlugcatGrab;
+        }
 
+        private void Player_SlugcatGrab(On.Player.orig_SlugcatGrab orig, Player self, PhysicalObject obj, int graspUsed)
+        {
+            orig(self, obj, graspUsed);
+            if (IsMe(self) && self.FoodInStomach != self.MaxFoodInStomach) {
+                if (obj is IPlayerEdible icr && !(obj is KarmaFlower) && !(obj is Mushroom) && (!(obj is Creature) || (obj is Creature cr && (cr.dead || cr is Fly || cr is SmallNeedleWorm)))) {
+                    obj.slatedForDeletetion = true;
+                    self.AddFood(icr.FoodPoints);
+                    self.room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, obj.firstChunk.pos, 1f, 1.2f);
+                }
+                Lighter.getMine(self).semicost = false;
+            }
+        }
+
+        private int Player_Grabability(On.Player.orig_Grabability orig, Player self, PhysicalObject obj)
+        {
+            if (obj is Lighter l && Lighter.getMine(self) != l) {
+                return 0;
+            }
+            return orig(self, obj);
+        }
+
+        private bool Player_CanBeSwallowed(On.Player.orig_CanBeSwallowed orig, Player self, PhysicalObject testObj)
+        {
+            if(testObj is Lighter) {
+                return false;
+            }
+            return orig(self, testObj);
         }
 
         private void Player_ThrowObject(On.Player.orig_ThrowObject orig, Player self, int grasp, bool eu)
@@ -225,6 +257,34 @@ namespace TheVolatile
                 else
                     Array.Resize(ref sLeaser.containers, sLeaser.containers.Length + 1);
                 sLeaser.containers[sLeaser.containers.Length - 1] = fContainer;
+
+
+
+                CustomAtlases.FetchAtlas("OutlineTail");
+                
+                TriangleMesh tailMesh = new TriangleMesh("OutlineTail", (sLeaser.sprites[2] as TriangleMesh).triangles, true) {
+                    color = instance.volatileColor(self.player)[0],
+                    element = new FSprite("OutlineTail").element
+                };
+                for (int j = tailMesh.vertices.Length - 1; j >= 0; j--) {
+                    float num = (float)(j / 2) / (float)(tailMesh.vertices.Length / 2);
+                    Vector2 vector;
+                    if (j % 2 == 0) {                                                                
+                        vector = new Vector2(num, 0f);
+                    } else if (j < tailMesh.vertices.Length - 1) {
+                        vector = new Vector2(num, 1f);
+                    } else {
+                        vector = new Vector2(1f, 0f);
+                    }
+                    vector.x = Mathf.Lerp(tailMesh.element.uvBottomLeft.x, tailMesh.element.uvTopRight.x, vector.x);
+                    vector.y = Mathf.Lerp(tailMesh.element.uvBottomLeft.y, tailMesh.element.uvTopRight.y, vector.y);
+                    tailMesh.UVvertices[j] = vector;
+                }
+
+                self.tail[0] = new TailSegment(self, 8f, 6f, null, 0.85f, 1f, 1f, true);
+                self.tail[1] = new TailSegment(self, 8f, 10f, self.tail[0], 0.85f, 1f, 0.5f, true);
+                self.tail[2] = new TailSegment(self, 5.5f, 10f, self.tail[1], 0.85f, 1f, 0.5f, true);
+                self.tail[3] = new TailSegment(self, 2f, 10f, self.tail[2], 0.85f, 1f, 0.5f, true);
 
                 sLeaser.AddSpritesToContainer(fContainer, rCam);
             }

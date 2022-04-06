@@ -1,23 +1,20 @@
 ﻿using RWCustom;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace TheVolatile
 {
     public class Lighter : Rock
     {
-        System.Random r = new System.Random();
         public Player player;
-        int timeSinceHold = 0;
+        int timeSinceClick = 0;
         bool open = false;
         public bool lit = false;
         bool iveBeenOpen = false;
         int delay = 0;
         const int resetDelay = 20;
-        static List<Lighter> allLighters = new List<Lighter>();
+        public static List<Lighter> allLighters = new List<Lighter>();
 
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
         {
@@ -51,9 +48,9 @@ namespace TheVolatile
             base.Update(eu);
             firstTickOfExisting = false;
 
-            if (player.input[0].pckp) {
-                timeSinceHold++;
-                if (timeSinceHold > 8) {
+            if (player.input[0].pckp && player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) {
+                timeSinceClick++;
+                if (timeSinceClick > 8) {
                     open = true;
                 }
                 if (open && delay == 0 && (player.FoodInStomach > 0)) {
@@ -61,13 +58,13 @@ namespace TheVolatile
                     soundLoop.Volume = 1;
                 }
             } else {
-                timeSinceHold = 0;
+                timeSinceClick = 0;
                 open = false;
                 lit = false;
                 soundLoop.Volume = 0;
             }
 
-            if(r.Next(3) == 1 && lit) {
+            if(Plugin.r.Next(3) == 1 && lit) {
                 room.AddObject(new HolyFire.HolyFireSprite(firstChunk.pos + new Vector2(0, 4)));
             }
 
@@ -81,13 +78,17 @@ namespace TheVolatile
             iveBeenOpen = open;
         }
 
+        public bool semicost = false;
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
             if (!lit)
                 base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
             else {
                 delay = resetDelay;
-                reduceFood();
+                if (semicost) {
+                    reduceFood();
+                    semicost = false;
+                }else semicost = true;
 
                 Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
 
@@ -142,7 +143,7 @@ namespace TheVolatile
                 Vector2 B = sLeaser.sprites[0].GetPosition();
 
                 Vector2 perpTheta = new Vector2((A - B).y, -(A - B).x).normalized;
-                float bonus = Mathf.Lerp(0.7f, 0.1f, Mathf.InverseLerp(1, 7, Vector2.Distance(A, B) / 20));
+                float bonus = Mathf.Lerp(.7f, .1f, Mathf.InverseLerp(1, 7, Vector2.Distance(A, B) / 20));
 
                 for (int i = 0; i <= 7; i++) {
                     Vector2 haver = Vector2.Lerp(A, B, i/7f);
@@ -154,10 +155,10 @@ namespace TheVolatile
                 }
                 mesh.MoveBehindOtherNode(playerLeaser.sprites[9]);
 
-                float x = A.x > B.x ? -1 : 1;
-                mesh.MoveVertice(16, B + bonus * new Vector2(5 * x, 5));
-                mesh.MoveVertice(17, B + bonus * new Vector2(5 * x, -5));
-                mesh.MoveVertice(18, B + bonus * new Vector2(8 * x, 0));
+                float dir = A.x > B.x ? -1 : 1;
+                mesh.MoveVertice(16, B + bonus * new Vector2(5 * dir, 6 * dir));
+                mesh.MoveVertice(17, B + bonus * new Vector2(5 * dir, -6 * dir));
+                mesh.MoveVertice(18, B + bonus * new Vector2(10 * dir, 0));
             }
 
             if (slatedForDeletetion || room != rCam.room) {
