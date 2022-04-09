@@ -78,7 +78,7 @@
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
-        <uint>1</uint>
+        <uint>0</uint>
         <key>webpQualityLevel</key>
         <uint>101</uint>
         <key>textureSubPath</key>
@@ -106,7 +106,7 @@
         <key>algorithmSettings</key>
         <struct type="AlgorithmSettings">
             <key>algorithm</key>
-            <enum type="AlgorithmSettings::AlgorithmId">MaxRects</enum>
+            <enum type="AlgorithmSettings::AlgorithmId">Basic</enum>
             <key>freeSizeMode</key>
             <enum type="AlgorithmSettings::AlgorithmFreeSizeMode">Best</enum>
             <key>sizeConstraints</key>
@@ -136,7 +136,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename></filename>
+                <filename>../Atlases/Atlas.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -153,7 +153,7 @@
             <string></string>
         </struct>
         <key>autoAliasEnabled</key>
-        <true/>
+        <false/>
         <key>trimSpriteNames</key>
         <false/>
         <key>prependSmartFolderName</key>
@@ -167,13 +167,13 @@
             <key>scaleMode</key>
             <enum type="ScaleMode">Smooth</enum>
             <key>extrude</key>
-            <uint>1</uint>
+            <uint>0</uint>
             <key>trimThreshold</key>
             <uint>1</uint>
             <key>trimMargin</key>
             <uint>1</uint>
             <key>trimMode</key>
-            <enum type="SpriteSettings::TrimMode">Trim</enum>
+            <enum type="SpriteSettings::TrimMode">None</enum>
             <key>tracerTolerance</key>
             <int>200</int>
             <key>heuristicMask</key>
@@ -184,9 +184,134 @@
             <false/>
         </struct>
         <key>individualSpriteSettings</key>
-        <map type="IndividualSpriteSettingsMap"/>
+        <map type="IndividualSpriteSettingsMap">
+            <key type="filename">FaceA0slime.png</key>
+            <key type="filename">FaceA1slime.png</key>
+            <key type="filename">FaceA2slime.png</key>
+            <key type="filename">FaceA3slime.png</key>
+            <key type="filename">FaceA4slime.png</key>
+            <key type="filename">FaceA5slime.png</key>
+            <key type="filename">FaceA6slime.png</key>
+            <key type="filename">FaceA7slime.png</key>
+            <key type="filename">FaceA8slime.png</key>
+            <key type="filename">FaceB0slime.png</key>
+            <key type="filename">FaceB1slime.png</key>
+            <key type="filename">FaceB2slime.png</key>
+            <key type="filename">FaceB3slime.png</key>
+            <key type="filename">FaceB4slime.png</key>
+            <key type="filename">FaceB5slime.png</key>
+            <key type="filename">FaceB6slime.png</key>
+            <key type="filename">FaceB7slime.png</key>
+            <key type="filename">FaceB8slime.png</key>
+            <key type="filename">FaceDeadslime.png</key>
+            <key type="filename">FaceStunnedslime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,5,8,9</rect>
+                <key>scale9Paddings</key>
+                <rect>4,5,8,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">OutlineTail.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>32,16,64,32</rect>
+                <key>scale9Paddings</key>
+                <rect>32,16,64,32</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">PlayerArm0van.png</key>
+            <key type="filename">PlayerArm10van.png</key>
+            <key type="filename">PlayerArm11van.png</key>
+            <key type="filename">PlayerArm12van.png</key>
+            <key type="filename">PlayerArm1van.png</key>
+            <key type="filename">PlayerArm2van.png</key>
+            <key type="filename">PlayerArm3van.png</key>
+            <key type="filename">PlayerArm4van.png</key>
+            <key type="filename">PlayerArm5van.png</key>
+            <key type="filename">PlayerArm6van.png</key>
+            <key type="filename">PlayerArm7van.png</key>
+            <key type="filename">PlayerArm8van.png</key>
+            <key type="filename">PlayerArm9van.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,2,14,4</rect>
+                <key>scale9Paddings</key>
+                <rect>7,2,14,4</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">blob.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,5,5</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,5,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">floobert.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>12,5,23,10</rect>
+                <key>scale9Paddings</key>
+                <rect>12,5,23,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">lighterClosed.png</key>
+            <key type="filename">lighterOpen.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,5,13,10</rect>
+                <key>scale9Paddings</key>
+                <rect>7,5,13,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+        </map>
         <key>fileList</key>
-        <array/>
+        <array>
+            <filename>.</filename>
+        </array>
         <key>ignoreFileList</key>
         <array/>
         <key>replaceList</key>

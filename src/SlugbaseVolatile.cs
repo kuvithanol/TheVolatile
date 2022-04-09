@@ -47,7 +47,7 @@ namespace TheVolatile
         {
             orig(self, obj, graspUsed);
             if (IsMe(self) && self.FoodInStomach != self.MaxFoodInStomach) {
-                if (obj is IPlayerEdible icr && !(obj is KarmaFlower) && !(obj is Mushroom) && (!(obj is Creature) || (obj is Creature cr && (cr.dead || cr is Fly || cr is SmallNeedleWorm)))) {
+                if (obj is IPlayerEdible icr && !(obj is KarmaFlower) && !(obj is Mushroom) && (!(obj is Creature) || (obj is Creature cr && (cr.dead || cr is Fly || cr is SmallNeedleWorm || (cr is Centipede c && c.Edible))))) {
                     obj.slatedForDeletetion = true;
                     self.AddFood(icr.FoodPoints);
                     self.room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, obj.firstChunk.pos, 1f, 1.2f);
@@ -171,7 +171,6 @@ namespace TheVolatile
             }
         }
 
-
         private void Player_Update(On.Player.orig_Update orig, Player self, bool eu)
         {
             orig(self, eu);
@@ -224,11 +223,13 @@ namespace TheVolatile
 
                 if (!sLeaser.sprites[9].element.name.EndsWith("slime"))
                     sLeaser.sprites[9].element = new FSprite(sLeaser.sprites[9].element.name + "slime").element;
+
+
                 sLeaser.sprites[9].isVisible = true;
                 sLeaser.sprites[9].color = volatileColor(self.player, 1);
 
                 int i = 0;
-                foreach(FSprite vSprite in sLeaser.sprites) {
+                foreach (FSprite vSprite in sLeaser.sprites) {
                     FSprite mSprite = (FSprite)myContainer.GetChildAt(i);
                     if (i == 2 || i == 7 || i == 8 || i == 11 || i == 10) {
                         mSprite.isVisible = false;
@@ -236,15 +237,22 @@ namespace TheVolatile
                         mSprite.SetPosition(vSprite.GetPosition());
                         mSprite.SetAnchor(vSprite.GetAnchor());
                         mSprite.rotation = vSprite.rotation;
-                        if(vSprite?.element != null)
+                        mSprite.anchorX = vSprite.anchorX;
+                        mSprite.anchorY = vSprite.anchorY;
+
+                        if (vSprite?.element != null)
                             mSprite.element = vSprite.element;
                     }
-                    if(i == 6 || i == 5) {
-                        mSprite.isVisible = vSprite.isVisible; // <-----------
+                    if (i == 6 || i == 5) { //arms
+                        mSprite.isVisible = vSprite.isVisible;
                     }
 
                     i++;
                 }
+                //if (!sLeaser.sprites[5].element.name.EndsWith("van"))
+                //    sLeaser.sprites[5].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[5].element.name + "van");
+                //if (!sLeaser.sprites[6].element.name.EndsWith("van"))
+                //    sLeaser.sprites[6].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[5].element.name + "van");
             }
         }
 
@@ -308,6 +316,7 @@ namespace TheVolatile
             }
         }
 
+        public override string StartRoom => "GW_S06";
 
         public override string Description => "this cat is s";
 

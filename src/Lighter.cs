@@ -156,8 +156,8 @@ namespace TheVolatile
                 mesh.MoveBehindOtherNode(playerLeaser.sprites[9]);
 
                 float dir = A.x > B.x ? -1 : 1;
-                mesh.MoveVertice(16, B + bonus * new Vector2(5 * dir, 6 * dir));
-                mesh.MoveVertice(17, B + bonus * new Vector2(5 * dir, -6 * dir));
+                mesh.MoveVertice(16, B + bonus * new Vector2(5 * dir, 6 * dir * (1.5f - bonus)));
+                mesh.MoveVertice(17, B + bonus * new Vector2(5 * dir, -6 * dir * (1.5f - bonus)));
                 mesh.MoveVertice(18, B + bonus * new Vector2(10 * dir, 0));
             }
 
