@@ -156,7 +156,7 @@ namespace TheVolatile
                 mesh.MoveBehindOtherNode(playerLeaser.sprites[9]);
 
                 float dir = A.x > B.x ? -1 : 1;
-                mesh.MoveVertice(16, B + bonus * new Vector2(5 * dir, 6 * dir * (1.5f - bonus)));
+                mesh.MoveVertice(16, B + bonus * new Vector2(5 * dir, 4 * dir * (1.5f - bonus)));
                 mesh.MoveVertice(17, B + bonus * new Vector2(5 * dir, -6 * dir * (1.5f - bonus)));
                 mesh.MoveVertice(18, B + bonus * new Vector2(10 * dir, 0));
             }
@@ -238,9 +238,7 @@ namespace TheVolatile
             new TriangleMesh.Triangle(15,16,17),
             new TriangleMesh.Triangle(16,17,18)
             };
-            mesh = new TriangleMesh("floobert", tris, true) {
-                color = SlugbaseVolatile.instance.volatileColor(player, 0)
-            }; 
+            mesh = new TriangleMesh("floobert" + SlugbaseVolatile.instance.idstring(player.playerState.playerNumber), tris, true);
             for (int j = mesh.vertices.Length - 1; j >= 0; j--) {
                 float num = (float)(j / 2) / (float)(mesh.vertices.Length / 2);
                 Vector2 vector;
@@ -276,7 +274,7 @@ namespace TheVolatile
             color = SlugbaseVolatile.instance.volatileColor(player, SlugbaseVolatile.LorO.Lighter);
             sLeaser.sprites[0].color = color;
             sLeaser.sprites[1].color = color;
-            sLeaser.sprites[2].color = SlugbaseVolatile.instance.SlugcatColor(player.playerState.playerNumber, Color.white) ?? Color.gray;
+            sLeaser.sprites[2].color = Color.white;
         }
     }
 

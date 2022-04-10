@@ -221,9 +221,8 @@ namespace TheVolatile
                 var outlineContainer = sLeaser.containers?.FirstOrDefault(x => x.data is string s && s == "slime");
                 if (outlineContainer == null) return;
 
-                if (!sLeaser.sprites[9].element.name.Contains("slime"))
-                    sLeaser.sprites[9].SetElementByName(sLeaser.sprites[9].element.name + "slime");
-                //face stuff
+                if (!sLeaser.sprites[9].element.name.Contains(idstring(self.player.playerState.playerNumber)) && sLeaser.sprites[9].element.name != null && sLeaser.sprites[9].element.name != "")
+                    sLeaser.sprites[9].SetElementByName(sLeaser.sprites[9].element.name + idstring(self.player.playerState.playerNumber));
 
 
                 if (!sLeaser.sprites[5].element.name.Contains("van")) {
@@ -234,6 +233,7 @@ namespace TheVolatile
                     sLeaser.sprites[6].SetElementByName(sLeaser.sprites[6].element.name + "van");
                 }
 
+                sLeaser.sprites[2].color = Color.white; //this sucks
 
                 sLeaser.sprites[9].isVisible = true;
                 sLeaser.sprites[9].color = SlugcatEyeColor(self.player.playerState.playerNumber) ?? Color.black;
@@ -263,7 +263,6 @@ namespace TheVolatile
             }
         }
         
-
         private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
         {
             orig(self, ow);
@@ -285,12 +284,12 @@ namespace TheVolatile
                     data = $"slime"
                 };
 
-                int i = 0; foreach (FSprite oldSprite in sLeaser.sprites) {
-                    FSprite newSprite = new FSprite(oldSprite.element);
+                int i = 0; foreach (FSprite vSprite in sLeaser.sprites) {
+                    FSprite mSprite = new FSprite(vSprite.element);
 
-                    newSprite.color = volatileColor(self.player, LorO.Outline);
-                    newSprite.SetPosition(oldSprite.GetPosition());
-                    fContainer.AddChild(newSprite);
+                    mSprite.color = volatileColor(self.player, LorO.Outline);
+                    mSprite.SetPosition(vSprite.GetPosition());
+                    fContainer.AddChild(mSprite);
                     i++;
                 }
                 if (sLeaser.containers == null)
@@ -299,11 +298,7 @@ namespace TheVolatile
                     Array.Resize(ref sLeaser.containers, sLeaser.containers.Length + 1);
                 sLeaser.containers[sLeaser.containers.Length - 1] = fContainer;
 
-
-
-                TriangleMesh tailMesh = new TriangleMesh("Futile_White", (sLeaser.sprites[2] as TriangleMesh).triangles, true) {
-                    color = instance.volatileColor(self.player, 0)
-                };
+                TriangleMesh tailMesh = new TriangleMesh("Outline" + idstring(self.player.playerState.playerNumber), (sLeaser.sprites[2] as TriangleMesh).triangles, true);
                 for (int j = tailMesh.vertices.Length - 1; j >= 0; j--) {
                     float num = (float)(j / 2) / (float)(tailMesh.vertices.Length / 2);
                     Vector2 vector;
@@ -325,6 +320,18 @@ namespace TheVolatile
             }
         }
 
+        public string idstring(int i)
+        {
+            switch (i) {
+                case 0: return "slime";
+                case 1: return "gup";
+                case 2: return "king";
+                case 3: return "cat";
+                default:
+                    return "slime";
+            }
+        }
+
         public override string StartRoom => "GW_S06";
 
         public override string Description => "this cat is s";
@@ -342,7 +349,7 @@ namespace TheVolatile
                     case 3: return new Color(.6f, .6f, .5f);
                     default: return new Color(.3f, .6f, .3f);
                 }
-            } else {
+            } else { //Lighter
                 switch (slugcatCharacter) {
                     case 0: return new Color(.1f, .3f, .1f);
                     case 1: return new Color(.1f, .05f, 0);
@@ -363,7 +370,7 @@ namespace TheVolatile
         {
             switch (slugcatCharacter) {
                 case 0: return new Color(.5f, .9f, .5f);
-                case 1: return new Color(1, .7f, 0);
+                case 1: return new Color(1, .75f, 0);
                 case 2: return new Color(0, .7f, 1);
                 case 3: return new Color(.4f, .4f, .4f);
                 default: return new Color(.5f, .9f, .5f);
@@ -375,7 +382,7 @@ namespace TheVolatile
             switch (slugcatCharacter) {
                 case 0: return new Color(.2f, .5f, .2f);
                 case 1: return new Color(1, .9f, .3f);
-                case 2: return new Color(0, .7f, 1);
+                case 2: return new Color(1, 1, 1);
                 case 3: return new Color(.2f, .2f, .1f);
                 default: return new Color(.2f, .5f, .2f);
             }
