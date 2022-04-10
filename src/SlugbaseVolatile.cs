@@ -221,8 +221,18 @@ namespace TheVolatile
                 var myContainer = sLeaser.containers?.FirstOrDefault(x => x.data is string s && s == "slime");
                 if (myContainer == null) return;
 
-                if (!sLeaser.sprites[9].element.name.EndsWith("slime"))
+                if (!sLeaser.sprites[9].element.name.Contains("slime"))
                     sLeaser.sprites[9].element = new FSprite(sLeaser.sprites[9].element.name + "slime").element;
+                //this works just fine i think
+
+
+                if (!sLeaser.sprites[5].element.name.Contains("van")) {
+                    sLeaser.sprites[5].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[5].element.name + "van");
+                }
+
+                if (!sLeaser.sprites[6].element.name.Contains("van")) {
+                    sLeaser.sprites[6].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[6].element.name + "van");
+                }
 
 
                 sLeaser.sprites[9].isVisible = true;
@@ -231,7 +241,7 @@ namespace TheVolatile
                 int i = 0;
                 foreach (FSprite vSprite in sLeaser.sprites) {
                     FSprite mSprite = (FSprite)myContainer.GetChildAt(i);
-                    if (i == 2 || i == 7 || i == 8 || i == 11 || i == 10) {
+                    if (i == 2 || i == 7 || i == 8 || i == 11 || i == 10 || i == 9) {
                         mSprite.isVisible = false;
                     } else {
                         mSprite.SetPosition(vSprite.GetPosition());
@@ -239,6 +249,15 @@ namespace TheVolatile
                         mSprite.rotation = vSprite.rotation;
                         mSprite.anchorX = vSprite.anchorX;
                         mSprite.anchorY = vSprite.anchorY;
+
+                        if (!mSprite.element.name.Contains("slime") && mSprite.element.name != "BodyA") {
+                                mSprite.element = Futile.atlasManager.GetElementWithName(vSprite.element.name + "slime");
+
+                                Debug.Log(mSprite.element.name);
+                            
+                        }
+
+
 
                         if (vSprite?.element != null)
                             mSprite.element = vSprite.element;
@@ -249,21 +268,20 @@ namespace TheVolatile
 
                     i++;
                 }
-                //if (!sLeaser.sprites[5].element.name.EndsWith("van"))
-                //    sLeaser.sprites[5].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[5].element.name + "van");
-                //if (!sLeaser.sprites[6].element.name.EndsWith("van"))
-                //    sLeaser.sprites[6].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[5].element.name + "van");
             }
         }
+        
 
         private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
         {
             orig(self, ow);
 
-            self.tail[0] = new TailSegment(self, 8f, 6f, null, 0.85f, 1f, 1f, true);
-            self.tail[1] = new TailSegment(self, 8f, 10f, self.tail[0], 0.85f, 1f, 0.5f, true);
-            self.tail[2] = new TailSegment(self, 5.5f, 10f, self.tail[1], 0.85f, 1f, 0.5f, true);
-            self.tail[3] = new TailSegment(self, 2f, 10f, self.tail[2], 0.85f, 1f, 0.5f, true);
+            if (IsMe(self.player)) {
+                self.tail[0] = new TailSegment(self, 8f, 6f, null, 0.85f, 1f, 1f, true);
+                self.tail[1] = new TailSegment(self, 8f, 10f, self.tail[0], 0.85f, 1f, 0.5f, true);
+                self.tail[2] = new TailSegment(self, 5.5f, 10f, self.tail[1], 0.85f, 1f, 0.5f, true);
+                self.tail[3] = new TailSegment(self, 2f, 10f, self.tail[2], 0.85f, 1f, 0.5f, true);
+            }
         }
 
         private void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -280,7 +298,6 @@ namespace TheVolatile
 
                     newSprite.color = volatileColor(self.player,.6f);
                     newSprite.SetPosition(oldSprite.GetPosition());
-                    newSprite.scale = 1.5f;
                     fContainer.AddChild(newSprite);
                     i++;
                 }
