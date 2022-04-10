@@ -218,29 +218,29 @@ namespace TheVolatile
             orig(self, sLeaser, rCam, timeStacker, camPos);
 
             if (IsMe(self.player)) {
-                var myContainer = sLeaser.containers?.FirstOrDefault(x => x.data is string s && s == "slime");
-                if (myContainer == null) return;
+                var outlineContainer = sLeaser.containers?.FirstOrDefault(x => x.data is string s && s == "slime");
+                if (outlineContainer == null) return;
 
                 if (!sLeaser.sprites[9].element.name.Contains("slime"))
-                    sLeaser.sprites[9].element = new FSprite(sLeaser.sprites[9].element.name + "slime").element;
-                //this works just fine i think
+                    sLeaser.sprites[9].SetElementByName(sLeaser.sprites[9].element.name + "slime");
+                //face stuff
 
 
                 if (!sLeaser.sprites[5].element.name.Contains("van")) {
-                    sLeaser.sprites[5].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[5].element.name + "van");
+                    sLeaser.sprites[5].SetElementByName(sLeaser.sprites[5].element.name + "van");
                 }
 
                 if (!sLeaser.sprites[6].element.name.Contains("van")) {
-                    sLeaser.sprites[6].element = Futile.atlasManager.GetElementWithName(sLeaser.sprites[6].element.name + "van");
+                    sLeaser.sprites[6].SetElementByName(sLeaser.sprites[6].element.name + "van");
                 }
 
 
                 sLeaser.sprites[9].isVisible = true;
-                sLeaser.sprites[9].color = volatileColor(self.player, 1);
+                sLeaser.sprites[9].color = SlugcatEyeColor(self.player.playerState.playerNumber) ?? Color.black;
 
                 int i = 0;
                 foreach (FSprite vSprite in sLeaser.sprites) {
-                    FSprite mSprite = (FSprite)myContainer.GetChildAt(i);
+                    FSprite mSprite = (FSprite)outlineContainer.GetChildAt(i);
                     if (i == 2 || i == 7 || i == 8 || i == 11 || i == 10 || i == 9) {
                         mSprite.isVisible = false;
                     } else {
@@ -249,18 +249,10 @@ namespace TheVolatile
                         mSprite.rotation = vSprite.rotation;
                         mSprite.anchorX = vSprite.anchorX;
                         mSprite.anchorY = vSprite.anchorY;
+                        mSprite.scaleX = vSprite.scaleX;
 
-                        if (!mSprite.element.name.Contains("slime") && mSprite.element.name != "BodyA") {
-                                mSprite.element = Futile.atlasManager.GetElementWithName(vSprite.element.name + "slime");
-
-                                Debug.Log(mSprite.element.name);
-                            
-                        }
-
-
-
-                        if (vSprite?.element != null)
-                            mSprite.element = vSprite.element;
+                        if(vSprite != null)
+                        mSprite.SetElementByName(vSprite.element.name + "slime");
                     }
                     if (i == 6 || i == 5) { //arms
                         mSprite.isVisible = vSprite.isVisible;
@@ -296,7 +288,7 @@ namespace TheVolatile
                 int i = 0; foreach (FSprite oldSprite in sLeaser.sprites) {
                     FSprite newSprite = new FSprite(oldSprite.element);
 
-                    newSprite.color = volatileColor(self.player,.6f);
+                    newSprite.color = volatileColor(self.player, LorO.Outline);
                     newSprite.SetPosition(oldSprite.GetPosition());
                     fContainer.AddChild(newSprite);
                     i++;
@@ -309,7 +301,7 @@ namespace TheVolatile
 
 
 
-                TriangleMesh tailMesh = new TriangleMesh("OutlineTail", (sLeaser.sprites[2] as TriangleMesh).triangles, true) {
+                TriangleMesh tailMesh = new TriangleMesh("Futile_White", (sLeaser.sprites[2] as TriangleMesh).triangles, true) {
                     color = instance.volatileColor(self.player, 0)
                 };
                 for (int j = tailMesh.vertices.Length - 1; j >= 0; j--) {
@@ -338,30 +330,54 @@ namespace TheVolatile
         public override string Description => "this cat is s";
 
         [Description("0 for the skin color, 1 for the face color")]
-        public Color volatileColor(Player p, float lerp)
+        public Color volatileColor(Player p, LorO lorO)
         {
-            return Color.Lerp((Color)SlugcatColor(p.playerState.playerNumber, Color.white), (Color)SlugcatEyeColor(p.playerState.playerNumber), lerp);
+            int slugcatCharacter = p.playerState.slugcatCharacter;
+
+            if (lorO == LorO.Outline) {
+                switch (slugcatCharacter) {
+                    case 0: return new Color(.3f, .6f, .3f);
+                    case 1: return new Color(1, .9f, .5f);
+                    case 2: return new Color(0, .9f, 1);
+                    case 3: return new Color(.6f, .6f, .5f);
+                    default: return new Color(.3f, .6f, .3f);
+                }
+            } else {
+                switch (slugcatCharacter) {
+                    case 0: return new Color(.1f, .3f, .1f);
+                    case 1: return new Color(.1f, .05f, 0);
+                    case 2: return new Color(1, 1, 0);
+                    case 3: return new Color(.1f, .1f, .1f);
+                    default: return new Color(.1f, .3f, .1f);
+                }
+            }
+        }
+
+        public enum LorO
+        {
+            Lighter,
+            Outline
         }
 
         public override Color? SlugcatColor(int slugcatCharacter, Color baseColor)
         {
             switch (slugcatCharacter) {
-                case 0: return Color.green;
-                case 1: return new Color(1, 0.5f, 0);
-                case 2: return Color.cyan;
-                case 3: return Color.Lerp(Color.magenta, Color.gray, 0.4f);
-                default: return Color.green;
+                case 0: return new Color(.5f, .9f, .5f);
+                case 1: return new Color(1, .7f, 0);
+                case 2: return new Color(0, .7f, 1);
+                case 3: return new Color(.4f, .4f, .4f);
+                default: return new Color(.5f, .9f, .5f);
             }
         }
 
         public override Color? SlugcatEyeColor(int slugcatCharacter)
         {
             switch (slugcatCharacter) {
-                case 0: return Color.Lerp(Color.green, Color.black, 0.5f);
-                case 1: return Color.yellow;
-                case 2: return Color.blue;
-                case 3: return Color.white;
-                default: return Color.green;
+                case 0: return new Color(.2f, .5f, .2f);
+                case 1: return new Color(1, .9f, .3f);
+                case 2: return new Color(0, .7f, 1);
+                case 3: return new Color(.2f, .2f, .1f);
+                default: return new Color(.2f, .5f, .2f);
             }
         }
 

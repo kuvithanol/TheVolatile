@@ -99,7 +99,7 @@ namespace TheVolatile
                 room.AddObject(new Explosion(room, null, pos, 2, 40, 5, 0, 0, 0, player, 0, 0, 0));
                 room.AddObject(new ExplosionSpikes(room, pos, 10, 0.5f, 2, 5, 15, SlugbaseVolatile.instance.volatileColor(player, 0)));
                 room.AddObject(new Explosion.ExplosionLight(pos, 280f, 0.7f, 7, SlugbaseVolatile.instance.volatileColor(player, 0)));
-                room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player, 0), SlugbaseVolatile.instance.volatileColor(player, 1), UnityEngine.Random.Range(3, 11)));
+                room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player, 0), SlugbaseVolatile.instance.SlugcatColor(player.playerState.playerNumber, Color.white) ?? Color.white, UnityEngine.Random.Range(3, 11)));
                 room.AddObject(new SootMark(room, pos, 50, false));
 
                 room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 3.5f, 0.8f);
@@ -203,6 +203,7 @@ namespace TheVolatile
             }
         }
 
+
         TriangleMesh mesh;
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
@@ -272,10 +273,10 @@ namespace TheVolatile
 
         public override void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
         {
-            color = Color.Lerp(SlugbaseVolatile.instance.volatileColor(player, 1), Color.black, 0.4f) ;
+            color = SlugbaseVolatile.instance.volatileColor(player, SlugbaseVolatile.LorO.Lighter);
             sLeaser.sprites[0].color = color;
             sLeaser.sprites[1].color = color;
-            sLeaser.sprites[2].color = SlugbaseVolatile.instance.volatileColor(player, 0);
+            sLeaser.sprites[2].color = SlugbaseVolatile.instance.SlugcatColor(player.playerState.playerNumber, Color.white) ?? Color.gray;
         }
     }
 
