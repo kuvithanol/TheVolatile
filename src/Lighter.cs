@@ -11,10 +11,19 @@ namespace TheVolatile
         int timeSinceClick = 0;
         bool open = false;
         public bool lit = false;
+        public bool bladeOut = false;
         bool iveBeenOpen = false;
         int delay = 0;
         const int resetDelay = 20;
         public static List<Lighter> allLighters = new List<Lighter>();
+        bool bladeMode = false;
+        int timeSinceBladeThrown = 0;
+        
+
+        public void toggleBlade()
+        {
+            bladeMode = !bladeMode;
+        }
 
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
         {
@@ -45,21 +54,48 @@ namespace TheVolatile
             base.Update(eu);
             firstTickOfExisting = false;
 
+            if(player.animation == Player.AnimationIndex.Roll && (player.room.game.IsArenaSession || (player.room.game.session is StoryGameSession sgs && sgs.saveState.deathPersistentSaveData.theMark)) && ((player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) || (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this))) {
+                if(!bladeMode)
+                    room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, firstChunk.pos, 2f, 1.2f);
+
+                bladeMode = true;
+            }
+
             if (player.input[0].pckp && ((player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) || (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this))) {
                 timeSinceClick++;
                 if (timeSinceClick > 8) {
                     open = true;
                 }
-                if (open && delay == 0 && (player.FoodInStomach > 0)) {
+                if (open && delay == 0 && (player.FoodInStomach > 0) && !bladeMode) {
                     lit = true;
                     soundLoop.Volume = 1;
                 }
+                if (open && bladeMode && timeSinceClick > 16) {
+                    if (!bladeOut) {
+                        room.PlaySound(SoundID.Bullet_Drip_Strike, firstChunk.pos, 1.5f, 1f);
+                        for (int i = 0; i < 10; i++) {
+                            room.AddObject(new Spark(firstChunk.pos, UnityEngine.Random.insideUnitCircle * 3 + rotation * 7 + firstChunk.vel, Color.white, null, 5, 18));
+                        }
+                    }
+                    bladeOut = true;
+                    lit = false;
+                    timeSinceBladeThrown = 0;
+                }
+
+                Debug.Log("fucko");
             } else {
                 timeSinceClick = 0;
                 open = false;
                 lit = false;
                 soundLoop.Volume = 0;
             }
+
+            if(timeSinceBladeThrown >= 10) {
+                bladeOut = false;
+            }else
+            timeSinceBladeThrown++;
+
+            
 
             if(Plugin.r.Next(3) == 1 && lit) {
                 room.AddObject(new HolyFire.HolyFireSprite(firstChunk.pos + new Vector2(0, 4)));
@@ -72,6 +108,10 @@ namespace TheVolatile
             }
 
 
+            if(mode != Mode.Thrown && grabbedBy.Count == 0) {
+                bladeMode = false;
+            }
+
             iveBeenOpen = open;
         }
 
@@ -79,7 +119,7 @@ namespace TheVolatile
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
             if (!lit)
-                base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc, eu);
+                base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, bladeMode ? frc*1.3f : frc, eu);
             else {
                 delay = resetDelay;
                 if (semicost) {
@@ -107,6 +147,28 @@ namespace TheVolatile
             }
         }
 
+        public override bool HitSomething(SharedPhysics.CollisionResult result, bool eu)
+        {
+            if (result.obj == null) {
+                return false;
+            }
+            this.vibrate = 20;
+            this.ChangeMode(Weapon.Mode.Free);
+            if (result.obj is Creature) {
+                (result.obj as Creature).Violence(base.firstChunk, new Vector2?(base.firstChunk.vel * base.firstChunk.mass), result.chunk, result.onAppendagePos, bladeMode ? Creature.DamageType.Stab : Creature.DamageType.Blunt, bladeMode ? 0.4f : 0.01f, bladeMode ? 70f : 45f);
+                if(bladeOut) bladeMode = false;
+            } else if (result.chunk != null) result.chunk.vel += base.firstChunk.vel * base.firstChunk.mass / result.chunk.mass; else if (result.onAppendagePos != null) (result.obj as PhysicalObject.IHaveAppendages).ApplyForceOnAppendage(result.onAppendagePos, base.firstChunk.vel * base.firstChunk.mass);
+            
+            base.firstChunk.vel = base.firstChunk.vel * -0.5f + Custom.DegToVec(UnityEngine.Random.value * 360f) * Mathf.Lerp(0.1f, 0.4f, UnityEngine.Random.value) * base.firstChunk.vel.magnitude;
+
+            if(!bladeOut) this.room.PlaySound(SoundID.Rock_Hit_Creature, base.firstChunk); else this.room.PlaySound(SoundID.Spear_Bounce_Off_Wall, base.firstChunk, false, 1.2f, .8f);
+
+            if (result.chunk != null) this.room.AddObject(new ExplosionSpikes(this.room, result.chunk.pos + Custom.DirVec(result.chunk.pos, result.collisionPoint) * result.chunk.rad, 5, 2f, 4f, 4.5f, 30f, new Color(1f, 1f, 1f, 0.5f)));
+            
+            this.SetRandomSpin();
+            return true;
+        }
+
         void reduceFood()
         {
             player.AddFood(-1);
@@ -123,7 +185,7 @@ namespace TheVolatile
             }
             sLeaser.sprites[0].x = a.x - camPos.x;
             sLeaser.sprites[0].y = a.y - camPos.y;
-            sLeaser.sprites[0].element = open ? new FSprite("lighterOpen").element : new FSprite("lighterClosed").element;
+            sLeaser.sprites[0].element = bladeOut ? new FSprite("lighterBlade").element : open ? new FSprite("lighterOpen").element : new FSprite("lighterClosed").element;
             sLeaser.sprites[0].rotation = Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), Vector3.Slerp(this.lastRotation, this.rotation, timeStacker));
             sLeaser.sprites[0].scaleX = (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this) ? -1f : 1f;
 
@@ -160,6 +222,11 @@ namespace TheVolatile
                 mesh.MoveVertice(17, B + bonus * new Vector2(5 * dir, -6 * dir * (1.5f - bonus)));
                 mesh.MoveVertice(18, B + bonus * new Vector2(10 * dir, 0));
             }
+
+            if(grabbedBy.Count == 0) {
+                ChangeOverlap(false);
+            } else
+                ChangeOverlap(true);
 
             if (slatedForDeletetion || room != rCam.room) {
                 sLeaser.CleanSpritesAndRemove();
@@ -260,8 +327,8 @@ namespace TheVolatile
 
         public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
-            if (/*newContatiner == null*/ true) {
-                newContatiner = rCam.ReturnFContainer("Background");
+            if (newContatiner == null) {
+                newContatiner = rCam.ReturnFContainer("Midground");
             }
             for (int i = sLeaser.sprites.Length - 1; i >= 0; i--) {
                 sLeaser.sprites[i].RemoveFromContainer();

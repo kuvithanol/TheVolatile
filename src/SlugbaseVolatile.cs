@@ -35,6 +35,15 @@ namespace TheVolatile
             On.Player.SlugcatGrab += Player_SlugcatGrab;
 
             On.GameSession.ctor += GameSession_ctor;
+            On.ScavengerAI.CollectScore_PhysicalObject_bool += ScavengerAI_CollectScore_PhysicalObject_bool;
+        }
+
+        private int ScavengerAI_CollectScore_PhysicalObject_bool(On.ScavengerAI.orig_CollectScore_PhysicalObject_bool orig, ScavengerAI self, PhysicalObject obj, bool weaponFiltered)
+        {
+            if(obj is Lighter) {
+                return 0;
+            }
+            return orig(self, obj, weaponFiltered);
         }
 
         private void GameSession_ctor(On.GameSession.orig_ctor orig, GameSession self, RainWorldGame game)
@@ -92,43 +101,31 @@ namespace TheVolatile
 
         private void IL_Player_ThrowObject(MonoMod.Cil.ILContext il)
         {
-            //Debug.Log("ilhook START");
             ILCursor baba = new ILCursor(il);
             ILCursor keke = new ILCursor(il);
-
-
-            //Plugin.logger.Log(BepInEx.Logging.LogLevel.Warning, "First IL:\n" + il);
-            //Debug.Log(baba);
 
             baba.GotoNext(
                 x => x.MatchLdarg(0),
                 x => x.MatchLdarg(1),
                 x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp")); //baba marks the target IL chunk
-            //Debug.Log(baba);
 
             keke.GotoNext(
                 x => x.MatchRet());
             ILLabel oldret = keke.DefineLabel();
             oldret = keke.MarkLabel();
-            //Debug.Log(keke);
 
             baba.RemoveRange(3); //baba removes the target IL chunk
-            //Plugin.logger.Log(BepInEx.Logging.LogLevel.Warning, "Remove3 IL:\n" + il);
 
             ILLabel newret = baba.DefineLabel();
             newret = baba.MarkLabel();
-            //Debug.Log(baba);
 
 #warning make this not an out when you get the chance!
             baba.GotoPrev(
                 x => x.MatchBrfalse(out oldret)); 
-            //Debug.Log(baba);
 
             baba.Remove();
-            //Plugin.logger.Log(BepInEx.Logging.LogLevel.Warning, "CullBR IL:\n" + il);
 
             baba.Emit(OpCodes.Brfalse, newret);
-            //Plugin.logger.Log(BepInEx.Logging.LogLevel.Warning, "ReplaceBR IL:\n" + il);
         }
 
         private void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
@@ -142,13 +139,7 @@ namespace TheVolatile
         {
             orig(self, abstractCreature, world);
             if (IsMe(self)) {
-
                 self.bounce = 0.4f;
-
-                AbstractLighter abstractLighter = new AbstractLighter(self.room.world, null, self.abstractCreature.pos, self.room.world.game.GetNewID(), self);
-                abstractLighter.RealizeInRoom();
-
-                self.abstractCreature.stuckObjects.Add(new LighterStick(abstractCreature, abstractLighter));
             }
         }
         private class LighterStick : AbstractPhysicalObject.AbstractObjectStick
@@ -176,6 +167,15 @@ namespace TheVolatile
             orig(self, eu);
             if (IsMe(self)) {
                 Lighter l = Lighter.getMine(self);
+
+                if (l == null) {
+                    AbstractLighter abstractLighter = new AbstractLighter(self.room.world, null, self.abstractCreature.pos, self.room.world.game.GetNewID(), self);
+                    abstractLighter.RealizeInRoom();
+
+                    self.abstractCreature.stuckObjects.Add(new LighterStick(self.abstractPhysicalObject, abstractLighter));
+                }
+
+
                 if (l != null && (!(self.grasps[0]?.grabbed == l || self.grasps[1]?.grabbed == l))) {
                     Vector2 playerLoc = self.firstChunk.pos;
                     Vector2 lighterLoc = l.firstChunk.pos;
@@ -197,20 +197,60 @@ namespace TheVolatile
                     motionDir = Custom.DirVec(lighterLoc, playerLoc);
                     l.firstChunk.pos += motionDir * ratio * elasticity;
                     l.firstChunk.vel += motionDir * ratio * elasticity;
+                } //  /\ floobert shit /\
+
+
+
+                { // \/ food size shit \/
+                    float foodFactor;
+                    if (!self.room.game.IsArenaSession)
+                        foodFactor = Mathf.Lerp(0.5f, 1.0f, (float)(self.FoodInStomach) / (float)(self.MaxFoodInStomach));
+                    else
+                        foodFactor = 1f;
+
+
+                    self.bounce = .4f;
+                    if (self.animation == Player.AnimationIndex.Roll) {
+                        self.bodyChunks[0].rad = 14 * foodFactor;
+                        self.bodyChunks[1].rad = 14 * foodFactor;
+                        self.bodyChunkConnections[0].distance = 5 * (foodFactor + .3f);
+                    }
+                    else if (self.animation == Player.AnimationIndex.DownOnFours)
+                    {
+                        self.bounce = .1f;
+                        self.bodyChunks[0].rad = 7 * foodFactor;
+                        self.bodyChunks[1].rad = 7 * foodFactor;
+                        self.bodyChunkConnections[0].distance = 17 * (foodFactor + .3f);
+                    }
+                    else {
+                        self.bodyChunks[0].rad = foodFactor * 9;
+                        self.bodyChunks[1].rad = foodFactor * 8;
+                        self.bodyChunkConnections[0].distance = 17 * foodFactor;
+                    }
+
+                    self.bodyChunks[0].mass = foodFactor * 0.4f;
+                    self.bodyChunks[1].mass = foodFactor * 0.3f;
                 }
+
+
             }
         }
 
         private void PlayerGraphics_AddToContainer(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
-            orig(self, sLeaser, rCam, newContatiner);
+            FContainer fucko = newContatiner;
+
+            if (newContatiner == null)
+                newContatiner = rCam.ReturnFContainer("Midground");
 
             if (IsMe(self.player)) {
                 var myContainer = sLeaser.containers?.FirstOrDefault(x => x.data is string s && s == "slime");
                 if(myContainer != null) {
-                    rCam.ReturnFContainer("Midground").AddChild(myContainer);
+                    newContatiner.AddChild(myContainer);
                 }
             }
+
+            orig(self, sLeaser, rCam, fucko);
         }
 
         private void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
@@ -250,6 +290,7 @@ namespace TheVolatile
                         mSprite.anchorX = vSprite.anchorX;
                         mSprite.anchorY = vSprite.anchorY;
                         mSprite.scaleX = vSprite.scaleX;
+                        mSprite.scaleY = vSprite.scaleY;
 
                         if(vSprite != null)
                         mSprite.SetElementByName(vSprite.element.name + "slime");
@@ -281,7 +322,7 @@ namespace TheVolatile
 
             if (IsMe(self.player)) {
                 FContainer fContainer = new FContainer {
-                    data = $"slime"
+                    data = "slime"
                 };
 
                 int i = 0; foreach (FSprite vSprite in sLeaser.sprites) {
@@ -316,7 +357,7 @@ namespace TheVolatile
                 sLeaser.sprites[2] = tailMesh;
 
 
-                sLeaser.AddSpritesToContainer(fContainer, rCam);
+                self.AddToContainer(sLeaser, rCam, null);
             }
         }
 
@@ -396,8 +437,8 @@ namespace TheVolatile
         protected override void GetStats(SlugcatStats stats)
         {
             stats.throwingSkill = 0;
-            stats.lungsFac = 0.1f;
-            stats.runspeedFac *= 0.9f;
+            stats.lungsFac = 0.2f;
+            stats.runspeedFac *= 1f;
         }
 
         public override void GetFoodMeter(out int maxFood, out int foodToSleep)

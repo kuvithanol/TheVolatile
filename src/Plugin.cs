@@ -8,7 +8,7 @@ using SlugBase;
 
 namespace TheVolatile
 {
-    [BepInPlugin("sov.sam.volatile", nameof(TheVolatile), "0.1")]
+    [BepInPlugin("sov.sam.volatile", nameof(TheVolatile), "2.0")]
     public sealed class Plugin : BaseUnityPlugin
     {
         public static System.Random r = new System.Random();
