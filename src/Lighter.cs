@@ -8,7 +8,7 @@ namespace TheVolatile
     public class Lighter : Rock
     {
         public Player player;
-        int timeSinceClick = 0;
+        public int timeSinceClick = 0;
         bool open = false;
         public bool lit = false;
         public bool bladeOut = false;
@@ -16,13 +16,27 @@ namespace TheVolatile
         int delay = 0;
         const int resetDelay = 20;
         public static List<Lighter> allLighters = new List<Lighter>();
-        bool bladeMode = false;
+        public bool bladeMode = false;
         int timeSinceBladeThrown = 0;
         
 
-        public void toggleBlade()
+        public void revealBlade()
         {
-            bladeMode = !bladeMode;
+            if (!bladeOut) {
+                room.PlaySound(SoundID.Bullet_Drip_Strike, firstChunk.pos, 1.5f, 1f);
+                for (int i = 0; i < 10; i++) 
+                    room.AddObject(new Spark(firstChunk.pos, UnityEngine.Random.insideUnitCircle * 3 + rotation * 7 + firstChunk.vel, Color.white, null, 5, 18));
+                }
+            timeSinceBladeThrown = 0;
+            bladeOut = true;
+        }
+
+        public void activateBladeMode()
+        {
+            if (!bladeMode)
+                room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, firstChunk.pos, 2f, 1.2f);
+            lit = false;
+            bladeMode = true;
         }
 
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
@@ -54,35 +68,24 @@ namespace TheVolatile
             base.Update(eu);
             firstTickOfExisting = false;
 
-            if(player.animation == Player.AnimationIndex.Roll && (player.room.game.IsArenaSession || (player.room.game.session is StoryGameSession sgs && sgs.saveState.deathPersistentSaveData.theMark)) && ((player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) || (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this))) {
-                if(!bladeMode)
-                    room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, firstChunk.pos, 2f, 1.2f);
-
-                bladeMode = true;
+            if(player.animation == Player.AnimationIndex.Roll && (player.room.game.IsArenaSession || (player.room.game.session is StoryGameSession sgs && sgs.saveState.deathPersistentSaveData.theMark)) && ((player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) || (player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this))) {
+                activateBladeMode();
             }
 
             if (player.input[0].pckp && ((player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) || (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this))) {
-                timeSinceClick++;
-                if (timeSinceClick > 8) {
-                    open = true;
-                }
-                if (open && delay == 0 && (player.FoodInStomach > 0) && !bladeMode) {
-                    lit = true;
-                    soundLoop.Volume = 1;
-                }
-                if (open && bladeMode && timeSinceClick > 16) {
-                    if (!bladeOut) {
-                        room.PlaySound(SoundID.Bullet_Drip_Strike, firstChunk.pos, 1.5f, 1f);
-                        for (int i = 0; i < 10; i++) {
-                            room.AddObject(new Spark(firstChunk.pos, UnityEngine.Random.insideUnitCircle * 3 + rotation * 7 + firstChunk.vel, Color.white, null, 5, 18));
-                        }
+                 
+                    timeSinceClick++;
+                    if (timeSinceClick > 8) {
+                        open = true;
                     }
-                    bladeOut = true;
-                    lit = false;
-                    timeSinceBladeThrown = 0;
-                }
-
-                Debug.Log("fucko");
+                    if (open && delay == 0 && (player.FoodInStomach > 0) && !bladeMode) {
+                        lit = true;
+                        soundLoop.Volume = 1;
+                    }
+                    if (open && bladeMode && timeSinceClick > 16) {
+                        revealBlade();
+                    }
+                
             } else {
                 timeSinceClick = 0;
                 open = false;
@@ -92,8 +95,7 @@ namespace TheVolatile
 
             if(timeSinceBladeThrown >= 10) {
                 bladeOut = false;
-            }else
-            timeSinceBladeThrown++;
+            }else timeSinceBladeThrown++;
 
             
 
@@ -118,6 +120,7 @@ namespace TheVolatile
         public bool semicost = false;
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
+            timeSinceBladeThrown = 0;
             if (!lit)
                 base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, bladeMode ? frc*1.3f : frc, eu);
             else {
@@ -155,13 +158,14 @@ namespace TheVolatile
             this.vibrate = 20;
             this.ChangeMode(Weapon.Mode.Free);
             if (result.obj is Creature) {
-                (result.obj as Creature).Violence(base.firstChunk, new Vector2?(base.firstChunk.vel * base.firstChunk.mass), result.chunk, result.onAppendagePos, bladeMode ? Creature.DamageType.Stab : Creature.DamageType.Blunt, bladeMode ? 0.4f : 0.01f, bladeMode ? 70f : 45f);
+                (result.obj as Creature).Violence(base.firstChunk, new Vector2?(base.firstChunk.vel * base.firstChunk.mass), result.chunk, result.onAppendagePos, Creature.DamageType.Blunt, bladeMode ? 0.6f : 0.01f, bladeMode ? 100f : 45f);
                 if(bladeOut) bladeMode = false;
             } else if (result.chunk != null) result.chunk.vel += base.firstChunk.vel * base.firstChunk.mass / result.chunk.mass; else if (result.onAppendagePos != null) (result.obj as PhysicalObject.IHaveAppendages).ApplyForceOnAppendage(result.onAppendagePos, base.firstChunk.vel * base.firstChunk.mass);
             
             base.firstChunk.vel = base.firstChunk.vel * -0.5f + Custom.DegToVec(UnityEngine.Random.value * 360f) * Mathf.Lerp(0.1f, 0.4f, UnityEngine.Random.value) * base.firstChunk.vel.magnitude;
-
-            if(!bladeOut) this.room.PlaySound(SoundID.Rock_Hit_Creature, base.firstChunk); else this.room.PlaySound(SoundID.Spear_Bounce_Off_Wall, base.firstChunk, false, 1.2f, .8f);
+            
+            this.room.PlaySound(SoundID.Rock_Hit_Creature, base.firstChunk);
+            if (bladeOut) this.room.PlaySound(SoundID.Spear_Bounce_Off_Wall, base.firstChunk, false, 1.2f, .8f);
 
             if (result.chunk != null) this.room.AddObject(new ExplosionSpikes(this.room, result.chunk.pos + Custom.DirVec(result.chunk.pos, result.collisionPoint) * result.chunk.rad, 5, 2f, 4f, 4.5f, 30f, new Color(1f, 1f, 1f, 0.5f)));
             

@@ -190,6 +190,9 @@ namespace TheVolatile
                         dist -= ropeLength;
                         elasticity *= 1 + dist * 0.5f;
                     }
+                    if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown)
+                        elasticity += 1 + elasticity * 2;
+
                     float ratio = self.bodyChunks[1].mass / (l.firstChunk.mass + self.bodyChunks[1].mass);
                     Vector2 motionDir = Custom.DirVec(playerLoc, lighterLoc);
                     self.firstChunk.pos += motionDir * (1f - ratio) * elasticity * 0.2f;
@@ -199,12 +202,19 @@ namespace TheVolatile
                     l.firstChunk.vel += motionDir * ratio * elasticity;
                 } //  /\ floobert shit /\
 
+                if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown && Vector2.Distance(l.firstChunk.pos, self.firstChunk.pos) < 20) {
+                    bool q = false;
+                    if (self.grasps[0]?.grabbed == null && self.grasps[1]?.grabbed != l) { self.Grab(l, 0, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; } else if (self.grasps[1]?.grabbed == null && self.grasps[0]?.grabbed != l) { self.Grab(l, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; }
+                    if (q) { l.timeSinceClick = 20; l.activateBladeMode(); }
+                }
 
+                if (self.rollCounter == 10 && self.animation == Player.AnimationIndex.Roll)
+                    self.rollCounter--;
 
                 { // \/ food size shit \/
                     float foodFactor;
                     if (!self.room.game.IsArenaSession)
-                        foodFactor = Mathf.Lerp(0.5f, 1.0f, (float)(self.FoodInStomach) / (float)(self.MaxFoodInStomach));
+                        foodFactor = Mathf.Lerp(0.5f, 1.0f, (float)(self.FoodInStomach) / (float)(self.MaxFoodInStomach) + .4f);
                     else
                         foodFactor = 1f;
 
@@ -220,7 +230,7 @@ namespace TheVolatile
                         self.bounce = .1f;
                         self.bodyChunks[0].rad = 7 * foodFactor;
                         self.bodyChunks[1].rad = 7 * foodFactor;
-                        self.bodyChunkConnections[0].distance = 17 * (foodFactor + .3f);
+                        self.bodyChunkConnections[0].distance = 25 * (foodFactor + .3f);
                     }
                     else {
                         self.bodyChunks[0].rad = foodFactor * 9;
