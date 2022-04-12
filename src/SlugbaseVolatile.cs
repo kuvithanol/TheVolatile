@@ -23,6 +23,7 @@ namespace TheVolatile
             instance = this;
             On.Player.ctor += Player_ctor;
             On.Player.Update += Player_Update;
+            On.Player.Die += Player_Die;
             On.Creature.Violence += Creature_Violence;
             On.PlayerGraphics.ctor += PlayerGraphics_ctor;
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
@@ -36,6 +37,14 @@ namespace TheVolatile
 
             On.GameSession.ctor += GameSession_ctor;
             On.ScavengerAI.CollectScore_PhysicalObject_bool += ScavengerAI_CollectScore_PhysicalObject_bool;
+        }
+
+        private void Player_Die(On.Player.orig_Die orig, Player self)
+        {
+            if (IsMe(self)) {
+                Lighter.getMine(self).Destroy();
+            }
+            orig(self);
         }
 
         private int ScavengerAI_CollectScore_PhysicalObject_bool(On.ScavengerAI.orig_CollectScore_PhysicalObject_bool orig, ScavengerAI self, PhysicalObject obj, bool weaponFiltered)
@@ -55,13 +64,12 @@ namespace TheVolatile
         private void Player_SlugcatGrab(On.Player.orig_SlugcatGrab orig, Player self, PhysicalObject obj, int graspUsed)
         {
             orig(self, obj, graspUsed);
-            if (IsMe(self) && self.FoodInStomach != self.MaxFoodInStomach) {
+            if (IsMe(self) && ((self.room.game.session is ArenaGameSession g && g.ScoreOfPlayer(self, false) < 6) || (self.room.game.IsStorySession && self.FoodInStomach != self.MaxFoodInStomach))) {
                 if (obj is IPlayerEdible icr && !(obj is KarmaFlower) && !(obj is Mushroom) && (!(obj is Creature) || (obj is Creature cr && (cr.dead || cr is Fly || cr is SmallNeedleWorm || (cr is Centipede c && c.Edible))))) {
                     obj.slatedForDeletetion = true;
                     self.AddFood(icr.FoodPoints);
                     self.room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, obj.firstChunk.pos, 1f, 1.2f);
                 }
-                Lighter.getMine(self).semicost = false;
             }
         }
 
@@ -173,43 +181,55 @@ namespace TheVolatile
                     abstractLighter.RealizeInRoom();
 
                     self.abstractCreature.stuckObjects.Add(new LighterStick(self.abstractPhysicalObject, abstractLighter));
-                }
+                } else {
 
-
-                if (l != null && (!(self.grasps[0]?.grabbed == l || self.grasps[1]?.grabbed == l))) {
-                    Vector2 playerLoc = self.firstChunk.pos;
-                    Vector2 lighterLoc = l.firstChunk.pos;
-                    float ropeLength = 40f;
-                    float elasticity = 0.2f;
-                    float dist = Vector2.Distance(self.bodyChunks[1].pos, l.firstChunk.pos);
-
-                    if (dist < 20) {
-                        elasticity = 0;
+                    if(self.room.abstractRoom.name == "SB_L01") {
+                        l.Destroy();
                     }
-                    if (dist > ropeLength) {
-                        dist -= ropeLength;
-                        elasticity *= 1 + dist * 0.5f;
+
+                    if (l != null && (!(self.grasps[0]?.grabbed == l || self.grasps[1]?.grabbed == l))) {
+                        Vector2 playerLoc = self.firstChunk.pos;
+                        Vector2 lighterLoc = l.firstChunk.pos;
+                        float ropeLength = 40f;
+                        float elasticity = 0.2f;
+                        float dist = Vector2.Distance(self.bodyChunks[1].pos, l.firstChunk.pos);
+
+                        if (dist < 20) {
+                            elasticity = 0;
+                        }
+                        if (dist > ropeLength) {
+                            dist -= ropeLength;
+                            elasticity *= 1 + dist * 0.5f;
+                        }
+                        if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown)
+                            elasticity += 1 + elasticity * 2;
+
+                        float ratio = self.bodyChunks[1].mass / (l.firstChunk.mass + self.bodyChunks[1].mass);
+                        Vector2 motionDir = Custom.DirVec(playerLoc, lighterLoc);
+                        self.firstChunk.pos += motionDir * (1f - ratio) * elasticity * 0.2f;
+                        self.firstChunk.vel += motionDir * (1f - ratio) * elasticity * 0.2f;
+                        motionDir = Custom.DirVec(lighterLoc, playerLoc);
+                        l.firstChunk.pos += motionDir * ratio * elasticity;
+                        l.firstChunk.vel += motionDir * ratio * elasticity;
+                    } //  /\ floobert shit /\
+
+                    if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown && Vector2.Distance(l.firstChunk.pos, self.firstChunk.pos) < 20) {
+                        bool q = false;
+                        if (self.grasps[0]?.grabbed == null && self.grasps[1]?.grabbed != l) { self.Grab(l, 0, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; } else if (self.grasps[1]?.grabbed == null && self.grasps[0]?.grabbed != l) { self.Grab(l, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; }
+                        Debug.Log((self.room.game.IsArenaSession || (self.room.game.session is StoryGameSession h && h.saveState.deathPersistentSaveData.theMark)));
+
+                        if (q && (self.room.game.IsArenaSession || (self.room.game.session is StoryGameSession sgs && sgs.saveState.deathPersistentSaveData.theMark))) { l.timeSinceClick = 20; l.activateBladeMode(); }
                     }
-                    if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown)
-                        elasticity += 1 + elasticity * 2;
 
-                    float ratio = self.bodyChunks[1].mass / (l.firstChunk.mass + self.bodyChunks[1].mass);
-                    Vector2 motionDir = Custom.DirVec(playerLoc, lighterLoc);
-                    self.firstChunk.pos += motionDir * (1f - ratio) * elasticity * 0.2f;
-                    self.firstChunk.vel += motionDir * (1f - ratio) * elasticity * 0.2f;
-                    motionDir = Custom.DirVec(lighterLoc, playerLoc);
-                    l.firstChunk.pos += motionDir * ratio * elasticity;
-                    l.firstChunk.vel += motionDir * ratio * elasticity;
-                } //  /\ floobert shit /\
-
-                if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown && Vector2.Distance(l.firstChunk.pos, self.firstChunk.pos) < 20) {
-                    bool q = false;
-                    if (self.grasps[0]?.grabbed == null && self.grasps[1]?.grabbed != l) { self.Grab(l, 0, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; } else if (self.grasps[1]?.grabbed == null && self.grasps[0]?.grabbed != l) { self.Grab(l, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; }
-                    if (q) { l.timeSinceClick = 20; l.activateBladeMode(); }
+                    if (self.rollCounter >= 10 && self.animation == Player.AnimationIndex.Roll) { 
+                        if (l.rollRep >= 2) {
+                            l.rollRep = 0;
+                        } else {
+                            l.rollRep++;
+                            self.rollCounter--;
+                        }
+                    }
                 }
-
-                if (self.rollCounter == 10 && self.animation == Player.AnimationIndex.Roll)
-                    self.rollCounter--;
 
                 { // \/ food size shit \/
                     float foodFactor;
@@ -263,6 +283,18 @@ namespace TheVolatile
             orig(self, sLeaser, rCam, fucko);
         }
 
+        private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
+        {
+            orig(self, ow);
+
+            if (IsMe(self.player)) {
+                self.tail[0] = new TailSegment(self, 8f, 6f, null, 0.85f, 1f, 1f, true);
+                self.tail[1] = new TailSegment(self, 8f, 10f, self.tail[0], 0.85f, 1f, 0.5f, true);
+                self.tail[2] = new TailSegment(self, 5.5f, 10f, self.tail[1], 0.85f, 1f, 0.5f, true);
+                self.tail[3] = new TailSegment(self, 2f, 10f, self.tail[2], 0.85f, 1f, 0.5f, true);
+            }
+        }
+
         private void PlayerGraphics_DrawSprites(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             orig(self, sLeaser, rCam, timeStacker, camPos);
@@ -313,18 +345,6 @@ namespace TheVolatile
                 }
             }
         }
-        
-        private void PlayerGraphics_ctor(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
-        {
-            orig(self, ow);
-
-            if (IsMe(self.player)) {
-                self.tail[0] = new TailSegment(self, 8f, 6f, null, 0.85f, 1f, 1f, true);
-                self.tail[1] = new TailSegment(self, 8f, 10f, self.tail[0], 0.85f, 1f, 0.5f, true);
-                self.tail[2] = new TailSegment(self, 5.5f, 10f, self.tail[1], 0.85f, 1f, 0.5f, true);
-                self.tail[3] = new TailSegment(self, 2f, 10f, self.tail[2], 0.85f, 1f, 0.5f, true);
-            }
-        }
 
         private void PlayerGraphics_InitiateSprites(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
@@ -371,9 +391,12 @@ namespace TheVolatile
             }
         }
 
-        public string idstring(int i)
+        public string idstring(int slugcatCharacter)
         {
-            switch (i) {
+            if (SlimeConsole.forcecat != -1) {
+                slugcatCharacter = SlimeConsole.forcecat;
+            }
+            switch (slugcatCharacter) {
                 case 0: return "slime";
                 case 1: return "gup";
                 case 2: return "king";
@@ -383,7 +406,7 @@ namespace TheVolatile
             }
         }
 
-        public override string StartRoom => "GW_S06";
+        public override string StartRoom => !SlimeConsole.LM ? "GW_S06" : "LW_A12";
 
         public override string Description => "this cat is s";
 
@@ -391,6 +414,9 @@ namespace TheVolatile
         public Color volatileColor(Player p, LorO lorO)
         {
             int slugcatCharacter = p.playerState.slugcatCharacter;
+            if (SlimeConsole.forcecat != -1) {
+                slugcatCharacter = SlimeConsole.forcecat;
+            }
 
             if (lorO == LorO.Outline) {
                 switch (slugcatCharacter) {
@@ -419,6 +445,9 @@ namespace TheVolatile
 
         public override Color? SlugcatColor(int slugcatCharacter, Color baseColor)
         {
+            if (SlimeConsole.forcecat != -1) {
+                slugcatCharacter = SlimeConsole.forcecat;
+            }
             switch (slugcatCharacter) {
                 case 0: return new Color(.5f, .9f, .5f);
                 case 1: return new Color(1, .75f, 0);
@@ -430,6 +459,9 @@ namespace TheVolatile
 
         public override Color? SlugcatEyeColor(int slugcatCharacter)
         {
+            if (SlimeConsole.forcecat != -1) {
+                slugcatCharacter = SlimeConsole.forcecat;
+            }
             switch (slugcatCharacter) {
                 case 0: return new Color(.2f, .5f, .2f);
                 case 1: return new Color(1, .9f, .3f);
@@ -472,6 +504,15 @@ namespace TheVolatile
             if (tryret != null) Console.WriteLine($"BUILDING SCENE FROM ER: {oresname}");
             //if tryret is null, it means my name conversion was wrong or that i just didn't have the requested thing, let slugbase deal with it
             return tryret ?? base.GetResource(path);
+        }
+
+        public override void StartNewGame(Room room)
+        {
+            base.StartNewGame(room);
+
+
+            if (room.abstractRoom.name != StartRoom) return;
+            if (SlimeConsole.LM) room.AddObject(new SlimeStart(room));
         }
     }
 }

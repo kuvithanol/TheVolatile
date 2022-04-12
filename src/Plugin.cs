@@ -8,7 +8,7 @@ using SlugBase;
 
 namespace TheVolatile
 {
-    [BepInPlugin("sov.sam.volatile", nameof(TheVolatile), "2.0.1")]
+    [BepInPlugin("sov.sam.volatile", nameof(TheVolatile), "2.1.0")]
     public sealed class Plugin : BaseUnityPlugin
     {
         public static System.Random r = new System.Random();
@@ -18,6 +18,7 @@ namespace TheVolatile
             On.RainWorld.Start += RainWorld_Start;
             FisobRegistry fisobs = new FisobRegistry(new Fisob[] { FisLighter.Instance });
             fisobs.ApplyHooks();
+            SlimeConsole.Apply();
         }
 
         public void OnDisable()

@@ -185,25 +185,96 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">BodyAslime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,6,9,11</rect>
+                <key>scale9Paddings</key>
+                <rect>5,6,9,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">FaceA0cat.png</key>
+            <key type="filename">FaceA0gup.png</key>
+            <key type="filename">FaceA0king.png</key>
             <key type="filename">FaceA0slime.png</key>
+            <key type="filename">FaceA1cat.png</key>
+            <key type="filename">FaceA1gup.png</key>
+            <key type="filename">FaceA1king.png</key>
             <key type="filename">FaceA1slime.png</key>
+            <key type="filename">FaceA2cat.png</key>
+            <key type="filename">FaceA2gup.png</key>
+            <key type="filename">FaceA2king.png</key>
             <key type="filename">FaceA2slime.png</key>
+            <key type="filename">FaceA3cat.png</key>
+            <key type="filename">FaceA3king.png</key>
             <key type="filename">FaceA3slime.png</key>
+            <key type="filename">FaceA4cat.png</key>
+            <key type="filename">FaceA4king.png</key>
             <key type="filename">FaceA4slime.png</key>
+            <key type="filename">FaceA5cat.png</key>
+            <key type="filename">FaceA5gup.png</key>
+            <key type="filename">FaceA5king.png</key>
             <key type="filename">FaceA5slime.png</key>
+            <key type="filename">FaceA6cat.png</key>
+            <key type="filename">FaceA6gup.png</key>
+            <key type="filename">FaceA6king.png</key>
             <key type="filename">FaceA6slime.png</key>
+            <key type="filename">FaceA7cat.png</key>
+            <key type="filename">FaceA7gup.png</key>
+            <key type="filename">FaceA7king.png</key>
             <key type="filename">FaceA7slime.png</key>
+            <key type="filename">FaceA8cat.png</key>
+            <key type="filename">FaceA8gup.png</key>
+            <key type="filename">FaceA8king.png</key>
             <key type="filename">FaceA8slime.png</key>
+            <key type="filename">FaceB0cat.png</key>
+            <key type="filename">FaceB0gup.png</key>
+            <key type="filename">FaceB0king.png</key>
             <key type="filename">FaceB0slime.png</key>
+            <key type="filename">FaceB1cat.png</key>
+            <key type="filename">FaceB1gup.png</key>
+            <key type="filename">FaceB1king.png</key>
             <key type="filename">FaceB1slime.png</key>
+            <key type="filename">FaceB2cat.png</key>
+            <key type="filename">FaceB2gup.png</key>
+            <key type="filename">FaceB2king.png</key>
             <key type="filename">FaceB2slime.png</key>
+            <key type="filename">FaceB3cat.png</key>
+            <key type="filename">FaceB3king.png</key>
             <key type="filename">FaceB3slime.png</key>
+            <key type="filename">FaceB4cat.png</key>
+            <key type="filename">FaceB4king.png</key>
             <key type="filename">FaceB4slime.png</key>
+            <key type="filename">FaceB5cat.png</key>
+            <key type="filename">FaceB5gup.png</key>
+            <key type="filename">FaceB5king.png</key>
             <key type="filename">FaceB5slime.png</key>
+            <key type="filename">FaceB6cat.png</key>
+            <key type="filename">FaceB6gup.png</key>
+            <key type="filename">FaceB6king.png</key>
             <key type="filename">FaceB6slime.png</key>
+            <key type="filename">FaceB7cat.png</key>
+            <key type="filename">FaceB7gup.png</key>
+            <key type="filename">FaceB7king.png</key>
             <key type="filename">FaceB7slime.png</key>
+            <key type="filename">FaceB8cat.png</key>
+            <key type="filename">FaceB8gup.png</key>
+            <key type="filename">FaceB8king.png</key>
             <key type="filename">FaceB8slime.png</key>
+            <key type="filename">FaceDeadcat.png</key>
+            <key type="filename">FaceDeadgup.png</key>
+            <key type="filename">FaceDeadking.png</key>
             <key type="filename">FaceDeadslime.png</key>
+            <key type="filename">FaceStunnedcat.png</key>
+            <key type="filename">FaceStunnedgup.png</key>
+            <key type="filename">FaceStunnedking.png</key>
             <key type="filename">FaceStunnedslime.png</key>
             <key type="filename">HeadA5slime.png</key>
             <struct type="IndividualSpriteSettings">
@@ -217,6 +288,26 @@
                 <rect>4,5,8,9</rect>
                 <key>scale9Paddings</key>
                 <rect>4,5,8,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">FaceA3gup.png</key>
+            <key type="filename">FaceA4gup.png</key>
+            <key type="filename">FaceB3gup.png</key>
+            <key type="filename">FaceB4gup.png</key>
+            <key type="filename">HeadA12slime.png</key>
+            <key type="filename">HeadA13slime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,5,9,9</rect>
+                <key>scale9Paddings</key>
+                <rect>5,5,9,9</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -266,22 +357,6 @@
                 <rect>5,4,9,9</rect>
                 <key>scale9Paddings</key>
                 <rect>5,4,9,9</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">HeadA12slime.png</key>
-            <key type="filename">HeadA13slime.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,5,9,9</rect>
-                <key>scale9Paddings</key>
-                <rect>5,5,9,9</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -494,7 +569,10 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">OutlineTail.png</key>
+            <key type="filename">Outlinecat.png</key>
+            <key type="filename">Outlinegup.png</key>
+            <key type="filename">Outlineking.png</key>
+            <key type="filename">Outlineslime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -549,7 +627,10 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">floobert.png</key>
+            <key type="filename">floobertcat.png</key>
+            <key type="filename">floobertgup.png</key>
+            <key type="filename">floobertking.png</key>
+            <key type="filename">floobertslime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -561,6 +642,21 @@
                 <rect>12,5,23,10</rect>
                 <key>scale9Paddings</key>
                 <rect>12,5,23,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">lighterBlade.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,7,13,14</rect>
+                <key>scale9Paddings</key>
+                <rect>7,7,13,14</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

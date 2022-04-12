@@ -1,4 +1,5 @@
-﻿using RWCustom;
+﻿using Noise;
+using RWCustom;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,7 @@ namespace TheVolatile
 {
     public class Lighter : Rock
     {
+        public int rollRep = 0;
         public Player player;
         public int timeSinceClick = 0;
         bool open = false;
@@ -82,13 +84,13 @@ namespace TheVolatile
                         lit = true;
                         soundLoop.Volume = 1;
                     }
-                    if (open && bladeMode && timeSinceClick > 16) {
+                    if (open && bladeMode && timeSinceClick > 10) { 
                         revealBlade();
                     }
                 
             } else {
                 timeSinceClick = 0;
-                open = false;
+                open = bladeMode;
                 lit = false;
                 soundLoop.Volume = 0;
             }
@@ -99,7 +101,7 @@ namespace TheVolatile
 
             
 
-            if(Plugin.r.Next(3) == 1 && lit) {
+            if(Plugin.r.Next(7) <= (int)semiCost && lit) {
                 room.AddObject(new HolyFire.HolyFireSprite(firstChunk.pos + new Vector2(0, 4)));
             }
 
@@ -117,7 +119,29 @@ namespace TheVolatile
             iveBeenOpen = open;
         }
 
-        public bool semicost = false;
+        enumSemicost semiCost = Lighter.enumSemicost.no;
+        enum enumSemicost
+        {
+            no = 7,
+            notYet = 3,
+            NOW = 1
+        }
+        public bool semiCostIncrement()
+        {
+            if (semiCost == enumSemicost.no) {
+                semiCost = enumSemicost.notYet;
+
+            } else if (semiCost == enumSemicost.notYet) { 
+                semiCost = enumSemicost.NOW;
+
+            } else { 
+                semiCost = enumSemicost.no;
+
+                return true;
+            }
+            return false;
+        }
+
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
             timeSinceBladeThrown = 0;
@@ -125,29 +149,36 @@ namespace TheVolatile
                 base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, bladeMode ? frc*1.3f : frc, eu);
             else {
                 delay = resetDelay;
-                if (semicost) {
-                    reduceFood();
-                    semicost = false;
-                }else semicost = true;
-
-                Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
-
-                float X = player.input[0].x;
-                float Y = player.input[0].y;
-
-                if (gravity != 0 || firstChunk.submersion > 0.9f) pos -= new Vector2(X * 0.3f, (Y >= 0) ? 1.7f : -1.7f) * 10f;
-                else
-                    pos -= new Vector2(X, Y) * 10f;
-
-                room.AddObject(new Explosion(room, null, pos, 2, 40, 5, 0, 0, 0, player, 0, 0, 0));
-                room.AddObject(new ExplosionSpikes(room, pos, 10, 0.5f, 2, 5, 15, SlugbaseVolatile.instance.volatileColor(player, 0)));
-                room.AddObject(new Explosion.ExplosionLight(pos, 280f, 0.7f, 7, SlugbaseVolatile.instance.volatileColor(player, 0)));
-                room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player, 0), SlugbaseVolatile.instance.SlugcatColor(player.playerState.playerNumber, Color.white) ?? Color.white, UnityEngine.Random.Range(3, 11)));
-                room.AddObject(new SootMark(room, pos, 50, false));
-
-                room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 3.5f, 0.8f);
-                room.PlaySound(SoundID.Bomb_Explode, pos, 0.4f, 1.2f);
+                splode();
             }
+        }
+
+        private void splode()
+        {
+
+            Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
+
+            float X = player.input[0].x;
+            float Y = player.input[0].y;
+
+            if (gravity != 0 || firstChunk.submersion > 0.9f) pos -= new Vector2(X * 0.3f, (Y >= 0) ? 1.7f : -1.7f) * 10f;
+            else
+                pos -= new Vector2(X, Y) * 10f;
+
+            room.AddObject(new Explosion(room, null, pos, 2, 40, 5, 0, 0, 0, player, 0, 0, 0));
+            room.AddObject(new ExplosionSpikes(room, pos, 10, 0.5f, 2, 5, 15, SlugbaseVolatile.instance.volatileColor(player, 0)));
+            room.AddObject(new Explosion.ExplosionLight(pos, 280f, 0.7f, 7, SlugbaseVolatile.instance.volatileColor(player, 0)));
+            room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player, 0), SlugbaseVolatile.instance.SlugcatColor(player.playerState.playerNumber, Color.white) ?? Color.white, UnityEngine.Random.Range(3, 11)));
+            room.AddObject(new SootMark(room, pos, 50, false));
+
+            if (semiCostIncrement()) { 
+                reduceFood();
+                room.PlaySound(SoundID.Bomb_Explode, pos, 0.5f, 1.15f);
+            } else
+                room.PlaySound(SoundID.Bomb_Explode, pos, 0.4f, 1.2f);
+            room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 3.5f, 0.8f);
+
+            room.InGameNoise(new InGameNoise(firstChunk.pos, 6000f, player, .8f));
         }
 
         public override bool HitSomething(SharedPhysics.CollisionResult result, bool eu)
