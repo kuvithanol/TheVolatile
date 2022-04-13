@@ -19,7 +19,7 @@ namespace TheVolatile
         const int resetDelay = 20;
         public static List<Lighter> allLighters = new List<Lighter>();
         public bool bladeMode = false;
-        int timeSinceBladeThrown = 0;
+        int timeSinceThrown = 0;
         
 
         public void revealBlade()
@@ -29,7 +29,7 @@ namespace TheVolatile
                 for (int i = 0; i < 10; i++) 
                     room.AddObject(new Spark(firstChunk.pos, UnityEngine.Random.insideUnitCircle * 3 + rotation * 7 + firstChunk.vel, Color.white, null, 5, 18));
                 }
-            timeSinceBladeThrown = 0;
+            timeSinceThrown = 0;
             bladeOut = true;
         }
 
@@ -95,9 +95,9 @@ namespace TheVolatile
                 soundLoop.Volume = 0;
             }
 
-            if(timeSinceBladeThrown >= 10) {
+            if(timeSinceThrown >= 10) {
                 bladeOut = false;
-            }else timeSinceBladeThrown++;
+            }else timeSinceThrown++;
 
             
 
@@ -144,7 +144,7 @@ namespace TheVolatile
 
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
-            timeSinceBladeThrown = 0;
+            timeSinceThrown = 0;
             if (!lit)
                 base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, bladeMode ? frc*1.3f : frc, eu);
             else {

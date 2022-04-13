@@ -29,7 +29,6 @@ namespace TheVolatile
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
-            On.Player.ThrowObject += Player_ThrowObject;
             IL.Player.ThrowObject += IL_Player_ThrowObject;
             On.Player.CanBeSwallowed += Player_CanBeSwallowed;
             On.Player.Grabability += Player_Grabability;
@@ -89,16 +88,7 @@ namespace TheVolatile
             return orig(self, testObj);
         }
 
-        private void Player_ThrowObject(On.Player.orig_ThrowObject orig, Player self, int grasp, bool eu)
-        {
-            orig(self, grasp, eu);
-
-            if (!primedLighter(self, self.grasps[grasp].grabbed)) {
-                self.ReleaseGrasp(grasp);
-            }
-        }
-
-        bool primedLighter(Player p, PhysicalObject l)
+        bool lighterInterrupt(Player p, PhysicalObject l)
         {
             if (IsMe(p) && l is Lighter lig && lig.lit) {
                 lig.lit = false;
@@ -117,23 +107,18 @@ namespace TheVolatile
                 x => x.MatchLdarg(1),
                 x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp")); //baba marks the target IL chunk
 
-            keke.GotoNext(
-                x => x.MatchRet());
-            ILLabel oldret = keke.DefineLabel();
-            oldret = keke.MarkLabel();
+            baba.Emit(OpCodes.Ldarg_0);
+            baba.Emit(OpCodes.Ldarg_1);
+            baba.EmitDelegate<Func<Player, int, bool>>((ply, grasp) => {
+                var obj = ply.grasps[grasp].grabbed;
+                return lighterInterrupt(ply, obj);
+            });
 
-            baba.RemoveRange(3); //baba removes the target IL chunk
+            ILLabel release = keke.DefineLabel();
+            keke.GotoNext(x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp"));
+            release = keke.MarkLabel();
 
-            ILLabel newret = baba.DefineLabel();
-            newret = baba.MarkLabel();
-
-#warning make this not an out when you get the chance!
-            baba.GotoPrev(
-                x => x.MatchBrfalse(out oldret)); 
-
-            baba.Remove();
-
-            baba.Emit(OpCodes.Brfalse, newret);
+            baba.Emit(OpCodes.Brtrue, release);
         }
 
         private void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
@@ -167,6 +152,7 @@ namespace TheVolatile
                 "<stkA>",
                 this.B.ID.ToString()
                 });
+
             }
         }
 
