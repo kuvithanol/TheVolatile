@@ -29,13 +29,21 @@ namespace TheVolatile
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
-            IL.Player.ThrowObject += IL_Player_ThrowObject;
+            //IL.Player.ThrowObject += IL_Player_ThrowObject;
+            On.Player.ReleaseGrasp += Player_ReleaseGrasp;
             On.Player.CanBeSwallowed += Player_CanBeSwallowed;
             On.Player.Grabability += Player_Grabability;
             On.Player.SlugcatGrab += Player_SlugcatGrab;
+            On.SharedPhysics.TraceProjectileAgainstBodyChunks += SharedPhysics_TraceProjectileAgainstBodyChunks;
 
             On.GameSession.ctor += GameSession_ctor;
             On.ScavengerAI.CollectScore_PhysicalObject_bool += ScavengerAI_CollectScore_PhysicalObject_bool;
+        }
+
+        private SharedPhysics.CollisionResult SharedPhysics_TraceProjectileAgainstBodyChunks(On.SharedPhysics.orig_TraceProjectileAgainstBodyChunks orig, SharedPhysics.IProjectileTracer projTracer, Room room, Vector2 lastPos, ref Vector2 pos, float rad, int collisionLayer, PhysicalObject exemptObject, bool hitAppendages)
+        {
+            if (projTracer is Lighter) rad *= 2.5f;
+            return orig(projTracer, room, lastPos, ref pos, rad, collisionLayer, exemptObject, hitAppendages);
         }
 
         private void Player_Die(On.Player.orig_Die orig, Player self)
@@ -88,38 +96,48 @@ namespace TheVolatile
             return orig(self, testObj);
         }
 
-        bool lighterInterrupt(Player p, PhysicalObject l)
+        bool releaseInterrupt(Player p, PhysicalObject l)
         {
-            if (IsMe(p) && l is Lighter lig && lig.lit) {
+            if (IsMe(p) && l is Lighter lig && (lig.lit)) {
                 lig.lit = false;
                 return true;
             }
             return false;
         }
 
-        private void IL_Player_ThrowObject(MonoMod.Cil.ILContext il)
+        private void Player_ReleaseGrasp(On.Player.orig_ReleaseGrasp orig, Player self, int grasp)
         {
-            ILCursor baba = new ILCursor(il);
-            ILCursor keke = new ILCursor(il);
-
-            baba.GotoNext(
-                x => x.MatchLdarg(0),
-                x => x.MatchLdarg(1),
-                x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp")); //baba marks the target IL chunk
-
-            baba.Emit(OpCodes.Ldarg_0);
-            baba.Emit(OpCodes.Ldarg_1);
-            baba.EmitDelegate<Func<Player, int, bool>>((ply, grasp) => {
-                var obj = ply.grasps[grasp].grabbed;
-                return lighterInterrupt(ply, obj);
-            });
-
-            ILLabel release = keke.DefineLabel();
-            keke.GotoNext(x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp"));
-            release = keke.MarkLabel();
-
-            baba.Emit(OpCodes.Brtrue, release);
+            if (!(self.grasps[grasp]?.grabbed is Lighter lig && releaseInterrupt(self, lig))) orig(self, grasp);
         }
+
+        //private void IL_Player_ThrowObject(MonoMod.Cil.ILContext il)
+        //{
+        //    ILCursor baba = new ILCursor(il);
+        //    ILCursor keke = new ILCursor(il);
+
+        //    baba.GotoNext(
+        //        x => x.MatchLdarg(0),
+        //        x => x.MatchLdarg(1),
+        //        x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp"));
+        //    Debug.Log("baba move");
+
+        //    baba.Emit(OpCodes.Ldarg_0);
+        //    baba.Emit(OpCodes.Ldarg_1);
+        //    Debug.Log("baba emit ldargs");
+        //    baba.EmitDelegate<Func<Player, int, bool>>((ply, grasp) => {
+        //        var obj = ply.grasps[grasp].grabbed;
+        //        return releaseInterrupt(ply, obj);
+        //    });
+        //    Debug.Log("baba emit delegate");
+
+        //    ILLabel release = keke.DefineLabel();
+        //    keke.GotoNext(x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp"));
+        //    Debug.Log("keke move");
+        //    release = keke.MarkLabel();
+
+        //    baba.Emit(OpCodes.Brtrue, release);
+        //    Debug.Log("baba emit brtrue");
+        //}
 
         private void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
         {
@@ -161,6 +179,9 @@ namespace TheVolatile
             orig(self, eu);
             if (IsMe(self)) {
                 Lighter l = Lighter.getMine(self);
+                if(self.animation == Player.AnimationIndex.BellySlide) {
+                    self.animation = Player.AnimationIndex.Roll;
+                }
 
                 if (l == null) {
                     AbstractLighter abstractLighter = new AbstractLighter(self.room.world, null, self.abstractCreature.pos, self.room.world.game.GetNewID(), self);
@@ -202,9 +223,14 @@ namespace TheVolatile
                     if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown && Vector2.Distance(l.firstChunk.pos, self.firstChunk.pos) < 20) {
                         bool q = false;
                         if (self.grasps[0]?.grabbed == null && self.grasps[1]?.grabbed != l) { self.Grab(l, 0, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; } else if (self.grasps[1]?.grabbed == null && self.grasps[0]?.grabbed != l) { self.Grab(l, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; }
-                        Debug.Log((self.room.game.IsArenaSession || (self.room.game.session is StoryGameSession h && h.saveState.deathPersistentSaveData.theMark)));
 
                         if (q && (self.room.game.IsArenaSession || (self.room.game.session is StoryGameSession sgs && sgs.saveState.deathPersistentSaveData.theMark))) { l.timeSinceClick = 20; l.activateBladeMode(); }
+                    }
+
+                    if (self.animation == Player.AnimationIndex.RocketJump) {
+                        if(l.bladeMode)
+                            l.room.PlaySound(SoundID.Spear_Bounce_Off_Wall, l.firstChunk, false, 1f, .8f);
+                        l.bladeMode = false;
                     }
 
                     if (self.rollCounter >= 10 && self.animation == Player.AnimationIndex.Roll) { 
@@ -216,39 +242,34 @@ namespace TheVolatile
                         }
                     }
                 }
+            }
 
-                { // \/ food size shit \/
-                    float foodFactor;
-                    if (!self.room.game.IsArenaSession)
-                        foodFactor = Mathf.Lerp(0.5f, 1.0f, (float)(self.FoodInStomach) / (float)(self.MaxFoodInStomach) + .4f);
-                    else
-                        foodFactor = 1f;
+            { // \/ food size shit \/
+                float foodFactor;
+                if (!self.room.game.IsArenaSession)
+                    foodFactor = Mathf.Lerp(0.5f, 1.0f, (float)(self.FoodInStomach) / (float)(self.MaxFoodInStomach) + .4f);
+                else
+                    foodFactor = 1f;
 
 
-                    self.bounce = .4f;
-                    if (self.animation == Player.AnimationIndex.Roll) {
-                        self.bodyChunks[0].rad = 14 * foodFactor;
-                        self.bodyChunks[1].rad = 14 * foodFactor;
-                        self.bodyChunkConnections[0].distance = 5 * (foodFactor + .3f);
-                    }
-                    else if (self.animation == Player.AnimationIndex.DownOnFours)
-                    {
-                        self.bounce = .1f;
-                        self.bodyChunks[0].rad = 7 * foodFactor;
-                        self.bodyChunks[1].rad = 7 * foodFactor;
-                        self.bodyChunkConnections[0].distance = 25 * (foodFactor + .3f);
-                    }
-                    else {
-                        self.bodyChunks[0].rad = foodFactor * 9;
-                        self.bodyChunks[1].rad = foodFactor * 8;
-                        self.bodyChunkConnections[0].distance = 17 * foodFactor;
-                    }
-
-                    self.bodyChunks[0].mass = foodFactor * 0.4f;
-                    self.bodyChunks[1].mass = foodFactor * 0.3f;
+                self.bounce = .4f;
+                if (self.animation == Player.AnimationIndex.Roll) {
+                    self.bodyChunks[0].rad = 14 * foodFactor;
+                    self.bodyChunks[1].rad = 14 * foodFactor;
+                    self.bodyChunkConnections[0].distance = 5 * (foodFactor + .3f);
+                } else if (self.animation == Player.AnimationIndex.GrapplingSwing || self.bodyMode == Player.BodyModeIndex.CorridorClimb) {
+                    self.bounce = .1f;
+                    self.bodyChunks[0].rad = 7 * foodFactor;
+                    self.bodyChunks[1].rad = 7 * foodFactor;
+                    self.bodyChunkConnections[0].distance = 25 * (foodFactor + .3f);
+                } else {
+                    self.bodyChunks[0].rad = foodFactor * 9;
+                    self.bodyChunks[1].rad = foodFactor * 8;
+                    self.bodyChunkConnections[0].distance = 17 * foodFactor;
                 }
 
-
+                self.bodyChunks[0].mass = foodFactor * 0.4f;
+                self.bodyChunks[1].mass = foodFactor * 0.3f;
             }
         }
 
@@ -467,6 +488,7 @@ namespace TheVolatile
             stats.throwingSkill = 0;
             stats.lungsFac = 0.2f;
             stats.runspeedFac *= 1f;
+            stats.corridorClimbSpeedFac *= 1.3f;
         }
 
         public override void GetFoodMeter(out int maxFood, out int foodToSleep)
@@ -495,6 +517,9 @@ namespace TheVolatile
         public override void StartNewGame(Room room)
         {
             base.StartNewGame(room);
+            if(room.game.session is StoryGameSession sgs) {
+                sgs.saveState.deathPersistentSaveData.karma = 2;
+            }
 
 
             if (room.abstractRoom.name != StartRoom) return;

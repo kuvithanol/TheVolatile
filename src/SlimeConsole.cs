@@ -11,8 +11,11 @@ namespace TheVolatile
     internal static class SlimeConsole
     {
 
+        public static bool infBoom = false;
         public static bool LM = false;
         public static int forcecat = -1;
+
+
         public static void Apply()
         {
             try {
@@ -68,6 +71,11 @@ namespace TheVolatile
             new CommandBuilder("LMstart").Run((args) => {
                 LM = !LM;
                 WriteLine("Start in LM: " + LM);
+            }).Register();
+
+            new CommandBuilder("infLighter").Run((args) => {
+                infBoom = !infBoom;
+                WriteLine("infinite explosions: " + infBoom);
             }).Register();
         }
     }

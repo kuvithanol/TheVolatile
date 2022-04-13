@@ -19,7 +19,7 @@ namespace TheVolatile
         const int resetDelay = 20;
         public static List<Lighter> allLighters = new List<Lighter>();
         public bool bladeMode = false;
-        int timeSinceThrown = 0;
+        public int timeSinceUsed = 0;
         
 
         public void revealBlade()
@@ -29,7 +29,7 @@ namespace TheVolatile
                 for (int i = 0; i < 10; i++) 
                     room.AddObject(new Spark(firstChunk.pos, UnityEngine.Random.insideUnitCircle * 3 + rotation * 7 + firstChunk.vel, Color.white, null, 5, 18));
                 }
-            timeSinceThrown = 0;
+            timeSinceUsed = 0;
             bladeOut = true;
         }
 
@@ -48,6 +48,13 @@ namespace TheVolatile
 
             soundLoop.sound = SoundID.Fire_Spear_Ignite;
             soundLoop.Start();
+
+            this.flicker = new float[2, 3];
+            for (int i = 0; i < this.flicker.GetLength(0); i++) {
+                this.flicker[i, 0] = 1f;
+                this.flicker[i, 1] = 1f;
+                this.flicker[i, 2] = 1f;
+            }
         }
 
         public static Lighter getMine(Player p)
@@ -95,9 +102,9 @@ namespace TheVolatile
                 soundLoop.Volume = 0;
             }
 
-            if(timeSinceThrown >= 10) {
+            if(timeSinceUsed >= 10) {
                 bladeOut = false;
-            }else timeSinceThrown++;
+            }else timeSinceUsed++;
 
             
 
@@ -116,8 +123,35 @@ namespace TheVolatile
                 bladeMode = false;
             }
 
+            #region LightBullshit
+            for (int i = 0; i < this.flicker.GetLength(0); i++) {
+                this.flicker[i, 1] = this.flicker[i, 0];
+                this.flicker[i, 0] += Mathf.Pow(UnityEngine.Random.value, 3f) * 0.1f * ((UnityEngine.Random.value >= 0.5f) ? 1f : -1f);
+                this.flicker[i, 0] = Custom.LerpAndTick(this.flicker[i, 0], this.flicker[i, 2], 0.05f, 0.053333335f);
+                if (UnityEngine.Random.value < 0.2f) {
+                    this.flicker[i, 2] = 1f + Mathf.Pow(UnityEngine.Random.value, 3f) * 0.2f * ((UnityEngine.Random.value >= 0.5f) ? 1f : -1f);
+                }
+                this.flicker[i, 2] = Mathf.Lerp(this.flicker[i, 2], 1f, 0.01f);
+            }
+            if (this.lightSource == null) {
+                this.lightSource = new LightSource(base.firstChunk.pos, false, SlugbaseVolatile.instance.volatileColor(player, SlugbaseVolatile.LorO.Outline), this);
+                this.lightSource.affectedByPaletteDarkness = 0.5f;
+                this.room.AddObject(this.lightSource);
+            } else {
+                this.lightSource.setPos = new Vector2?(base.firstChunk.pos);
+                this.lightSource.setRad = new float?((70f + ((int)semiCost + 2) * 20f) * this.flicker[0, 0]);
+                this.lightSource.setAlpha = lit ? new float?(1f) : 0;
+                if (this.lightSource.slatedForDeletetion || this.lightSource.room != this.room) {
+                    this.lightSource = null;
+                }
+            }
+            #endregion
+
             iveBeenOpen = open;
         }
+
+        float[,] flicker;
+        LightSource lightSource;
 
         enumSemicost semiCost = Lighter.enumSemicost.no;
         enum enumSemicost
@@ -144,18 +178,44 @@ namespace TheVolatile
 
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
-            timeSinceThrown = 0;
+            timeSinceUsed = 0;
             if (!lit)
                 base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, bladeMode ? frc*1.3f : frc, eu);
             else {
+                if(!SlimeConsole.infBoom)
                 delay = resetDelay;
-                splode();
+                if (player.superLaunchJump < 20)
+                    splode();
+                else bigSplode();
             }
+        }
+
+        private void bigSplode()
+        {
+            Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
+
+            float X = -player.rollDirection;
+            
+            pos -= new Vector2(X * .5f, -.05f) * 10f;
+
+            room.AddObject(new Explosion(room, null, pos, 2, 60, 12, 0, 20, 0, player, 0, 0, 0));
+            room.AddObject(new ExplosionSpikes(room, pos, 12, 0.75f, 2, 7, 23, SlugbaseVolatile.instance.volatileColor(player, 0)));
+            room.AddObject(new Explosion.ExplosionLight(pos, 340f, 0.8f, 9, SlugbaseVolatile.instance.volatileColor(player, 0)));
+            room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1.3f, SlugbaseVolatile.instance.volatileColor(player, 0), SlugbaseVolatile.instance.SlugcatColor(player.playerState.playerNumber, Color.white) ?? Color.white, UnityEngine.Random.Range(3, 11)));
+            room.AddObject(new SootMark(room, pos, 80, true));
+
+
+            if (!SlimeConsole.infBoom)
+                reduceFood();
+
+            room.PlaySound(SoundID.Bomb_Explode, pos, 0.85f, 1.05f);
+            room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 4.5f, 0.7f);
+
+            room.InGameNoise(new InGameNoise(firstChunk.pos, 12000f, player, 1f));
         }
 
         private void splode()
         {
-
             Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
 
             float X = player.input[0].x;
@@ -171,8 +231,9 @@ namespace TheVolatile
             room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player, 0), SlugbaseVolatile.instance.SlugcatColor(player.playerState.playerNumber, Color.white) ?? Color.white, UnityEngine.Random.Range(3, 11)));
             room.AddObject(new SootMark(room, pos, 50, false));
 
-            if (semiCostIncrement()) { 
-                reduceFood();
+            if (semiCostIncrement()) {
+                if (!SlimeConsole.infBoom)
+                    reduceFood();
                 room.PlaySound(SoundID.Bomb_Explode, pos, 0.5f, 1.15f);
             } else
                 room.PlaySound(SoundID.Bomb_Explode, pos, 0.4f, 1.2f);
@@ -206,10 +267,12 @@ namespace TheVolatile
 
         void reduceFood()
         {
+            if (!SlimeConsole.infBoom) { 
             player.AddFood(-1);
             foreach (var cam in player.room.game.cameras)
                 if (cam.hud.owner == player && cam.hud.foodMeter is HUD.FoodMeter fm && fm.showCount > 0)
                     fm.circles[--fm.showCount].EatFade();
+            }
         }
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
