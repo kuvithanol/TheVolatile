@@ -5,6 +5,7 @@ using System.Text;
 using BepInEx;
 using BepInEx.Logging;
 using SlugBase;
+using UnityEngine;
 
 namespace TheVolatile
 {
@@ -16,9 +17,11 @@ namespace TheVolatile
         public void OnEnable()
         {
             On.RainWorld.Start += RainWorld_Start;
+            On.Room.ctor += Room_ctor;
             FisobRegistry fisobs = new FisobRegistry(new Fisob[] { FisLighter.Instance });
             fisobs.ApplyHooks();
             SlimeConsole.Apply();
+            PlacedObs.PlacedObs.Apply();
         }
 
         public void OnDisable()
@@ -36,6 +39,17 @@ namespace TheVolatile
             
 
             PlayerManager.RegisterCharacter(new SlugbaseVolatile());
+        }
+
+        private void Room_ctor(On.Room.orig_ctor orig, Room self, RainWorldGame game, World world, AbstractRoom abstractRoom)
+        {
+            orig(self, game, world, abstractRoom);
+            if (game != null && self.abstractRoom.name == "ROOOOOOOOOOOM") {
+                var pObj = new PlacedObject(PlacedObject.Type.None, null);
+                pObj.FromString(new string[] { "MountainShrine","2000.05","367.0028","0~0~2~3" });
+                self.roomSettings.placedObjects.Add(pObj);
+                Debug.Log("this is me when i ammend the constitution");
+            }
         }
     }
 }

@@ -8,10 +8,16 @@
   <ItemGroup>
     <None Remove="Atlases\Atlas.png" />
     <None Remove="Atlases\Atlas.txt" />
+    <None Remove="Atlases\CombatShrine.png" />
+    <None Remove="Atlases\CombatShrine.txt" />
     <None Remove="Atlases\lighterClosed.png" />
     <None Remove="Atlases\lighterClosed.txt" />
     <None Remove="Atlases\lighterOpen.png" />
     <None Remove="Atlases\lighterOpen.txt" />
+    <None Remove="Atlases\Shrines.png" />
+    <None Remove="Atlases\Shrines.txt" />
+    <None Remove="Atlases\Slimes.png" />
+    <None Remove="Atlases\Slimes.txt" />
     <None Remove="graphics\Scenes\NewDeath\FlowerA.png" />
     <None Remove="graphics\Scenes\NewDeath\FlowerA2.png" />
     <None Remove="graphics\Scenes\NewDeath\FlowerB.png" />
@@ -44,8 +50,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Atlases\Atlas.png" />
-    <EmbeddedResource Include="Atlases\Atlas.txt" />
+    <EmbeddedResource Include="Atlases\Shrines.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Atlases\Shrines.txt" />
+    <EmbeddedResource Include="Atlases\Slimes.png" />
+    <EmbeddedResource Include="Atlases\Slimes.txt" />
     <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerA.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>

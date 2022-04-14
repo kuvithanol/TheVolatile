@@ -1,0 +1,44 @@
+{"frames": {
+
+"mountainA.png":
+{
+	"frame": {"x":0,"y":0,"w":50,"h":86},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":86},
+	"sourceSize": {"w":50,"h":86}
+},
+"mountainB.png":
+{
+	"frame": {"x":0,"y":86,"w":50,"h":86},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":86},
+	"sourceSize": {"w":50,"h":86}
+},
+"mountainM.png":
+{
+	"frame": {"x":0,"y":172,"w":50,"h":86},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":86},
+	"sourceSize": {"w":50,"h":86}
+},
+"mountainO.png":
+{
+	"frame": {"x":0,"y":258,"w":50,"h":86},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":86},
+	"sourceSize": {"w":50,"h":86}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "Shrines.png",
+	"format": "RGBA8888",
+	"size": {"w":50,"h":344},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:3f64f2f564042be643c3101c484e5eeb:73350cbb74659084cf7e62cf416f7c03:ce248141eb7888defc2d3e6b50d04111$"
+}
+}

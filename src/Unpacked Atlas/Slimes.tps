@@ -74,7 +74,7 @@
             </struct>
         </struct>
         <key>shapePadding</key>
-        <uint>12</uint>
+        <uint>0</uint>
         <key>jpgQuality</key>
         <uint>80</uint>
         <key>pngOptimizationLevel</key>
@@ -88,7 +88,7 @@
         <key>textureFormat</key>
         <enum type="SettingsBase::TextureFormat">png</enum>
         <key>borderPadding</key>
-        <uint>2</uint>
+        <uint>0</uint>
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
@@ -136,7 +136,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>../Atlases/Atlas.txt</filename>
+                <filename>../Atlases/Slimes.txt</filename>
             </struct>
         </map>
         <key>multiPack</key>
@@ -185,7 +185,7 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">BodyAslime.png</key>
+            <key type="filename">Slimes/BodyAslime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -200,83 +200,82 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">FaceA0cat.png</key>
-            <key type="filename">FaceA0gup.png</key>
-            <key type="filename">FaceA0king.png</key>
-            <key type="filename">FaceA0slime.png</key>
-            <key type="filename">FaceA1cat.png</key>
-            <key type="filename">FaceA1gup.png</key>
-            <key type="filename">FaceA1king.png</key>
-            <key type="filename">FaceA1slime.png</key>
-            <key type="filename">FaceA2cat.png</key>
-            <key type="filename">FaceA2gup.png</key>
-            <key type="filename">FaceA2king.png</key>
-            <key type="filename">FaceA2slime.png</key>
-            <key type="filename">FaceA3cat.png</key>
-            <key type="filename">FaceA3king.png</key>
-            <key type="filename">FaceA3slime.png</key>
-            <key type="filename">FaceA4cat.png</key>
-            <key type="filename">FaceA4king.png</key>
-            <key type="filename">FaceA4slime.png</key>
-            <key type="filename">FaceA5cat.png</key>
-            <key type="filename">FaceA5gup.png</key>
-            <key type="filename">FaceA5king.png</key>
-            <key type="filename">FaceA5slime.png</key>
-            <key type="filename">FaceA6cat.png</key>
-            <key type="filename">FaceA6gup.png</key>
-            <key type="filename">FaceA6king.png</key>
-            <key type="filename">FaceA6slime.png</key>
-            <key type="filename">FaceA7cat.png</key>
-            <key type="filename">FaceA7gup.png</key>
-            <key type="filename">FaceA7king.png</key>
-            <key type="filename">FaceA7slime.png</key>
-            <key type="filename">FaceA8cat.png</key>
-            <key type="filename">FaceA8gup.png</key>
-            <key type="filename">FaceA8king.png</key>
-            <key type="filename">FaceA8slime.png</key>
-            <key type="filename">FaceB0cat.png</key>
-            <key type="filename">FaceB0gup.png</key>
-            <key type="filename">FaceB0king.png</key>
-            <key type="filename">FaceB0slime.png</key>
-            <key type="filename">FaceB1cat.png</key>
-            <key type="filename">FaceB1gup.png</key>
-            <key type="filename">FaceB1king.png</key>
-            <key type="filename">FaceB1slime.png</key>
-            <key type="filename">FaceB2cat.png</key>
-            <key type="filename">FaceB2gup.png</key>
-            <key type="filename">FaceB2king.png</key>
-            <key type="filename">FaceB2slime.png</key>
-            <key type="filename">FaceB3cat.png</key>
-            <key type="filename">FaceB3king.png</key>
-            <key type="filename">FaceB3slime.png</key>
-            <key type="filename">FaceB4cat.png</key>
-            <key type="filename">FaceB4king.png</key>
-            <key type="filename">FaceB4slime.png</key>
-            <key type="filename">FaceB5cat.png</key>
-            <key type="filename">FaceB5gup.png</key>
-            <key type="filename">FaceB5king.png</key>
-            <key type="filename">FaceB5slime.png</key>
-            <key type="filename">FaceB6cat.png</key>
-            <key type="filename">FaceB6gup.png</key>
-            <key type="filename">FaceB6king.png</key>
-            <key type="filename">FaceB6slime.png</key>
-            <key type="filename">FaceB7cat.png</key>
-            <key type="filename">FaceB7gup.png</key>
-            <key type="filename">FaceB7king.png</key>
-            <key type="filename">FaceB7slime.png</key>
-            <key type="filename">FaceB8cat.png</key>
-            <key type="filename">FaceB8gup.png</key>
-            <key type="filename">FaceB8king.png</key>
-            <key type="filename">FaceB8slime.png</key>
-            <key type="filename">FaceDeadcat.png</key>
-            <key type="filename">FaceDeadgup.png</key>
-            <key type="filename">FaceDeadking.png</key>
-            <key type="filename">FaceDeadslime.png</key>
-            <key type="filename">FaceStunnedcat.png</key>
-            <key type="filename">FaceStunnedgup.png</key>
-            <key type="filename">FaceStunnedking.png</key>
-            <key type="filename">FaceStunnedslime.png</key>
-            <key type="filename">HeadA5slime.png</key>
+            <key type="filename">Slimes/FaceA0cat.png</key>
+            <key type="filename">Slimes/FaceA0gup.png</key>
+            <key type="filename">Slimes/FaceA0king.png</key>
+            <key type="filename">Slimes/FaceA0slime.png</key>
+            <key type="filename">Slimes/FaceA1cat.png</key>
+            <key type="filename">Slimes/FaceA1gup.png</key>
+            <key type="filename">Slimes/FaceA1king.png</key>
+            <key type="filename">Slimes/FaceA1slime.png</key>
+            <key type="filename">Slimes/FaceA2cat.png</key>
+            <key type="filename">Slimes/FaceA2gup.png</key>
+            <key type="filename">Slimes/FaceA2king.png</key>
+            <key type="filename">Slimes/FaceA2slime.png</key>
+            <key type="filename">Slimes/FaceA3cat.png</key>
+            <key type="filename">Slimes/FaceA3king.png</key>
+            <key type="filename">Slimes/FaceA3slime.png</key>
+            <key type="filename">Slimes/FaceA4cat.png</key>
+            <key type="filename">Slimes/FaceA4king.png</key>
+            <key type="filename">Slimes/FaceA4slime.png</key>
+            <key type="filename">Slimes/FaceA5cat.png</key>
+            <key type="filename">Slimes/FaceA5gup.png</key>
+            <key type="filename">Slimes/FaceA5king.png</key>
+            <key type="filename">Slimes/FaceA5slime.png</key>
+            <key type="filename">Slimes/FaceA6cat.png</key>
+            <key type="filename">Slimes/FaceA6gup.png</key>
+            <key type="filename">Slimes/FaceA6king.png</key>
+            <key type="filename">Slimes/FaceA6slime.png</key>
+            <key type="filename">Slimes/FaceA7cat.png</key>
+            <key type="filename">Slimes/FaceA7gup.png</key>
+            <key type="filename">Slimes/FaceA7king.png</key>
+            <key type="filename">Slimes/FaceA7slime.png</key>
+            <key type="filename">Slimes/FaceA8cat.png</key>
+            <key type="filename">Slimes/FaceA8gup.png</key>
+            <key type="filename">Slimes/FaceA8king.png</key>
+            <key type="filename">Slimes/FaceA8slime.png</key>
+            <key type="filename">Slimes/FaceB0cat.png</key>
+            <key type="filename">Slimes/FaceB0gup.png</key>
+            <key type="filename">Slimes/FaceB0king.png</key>
+            <key type="filename">Slimes/FaceB0slime.png</key>
+            <key type="filename">Slimes/FaceB1cat.png</key>
+            <key type="filename">Slimes/FaceB1gup.png</key>
+            <key type="filename">Slimes/FaceB1king.png</key>
+            <key type="filename">Slimes/FaceB1slime.png</key>
+            <key type="filename">Slimes/FaceB2cat.png</key>
+            <key type="filename">Slimes/FaceB2gup.png</key>
+            <key type="filename">Slimes/FaceB2king.png</key>
+            <key type="filename">Slimes/FaceB2slime.png</key>
+            <key type="filename">Slimes/FaceB3cat.png</key>
+            <key type="filename">Slimes/FaceB3king.png</key>
+            <key type="filename">Slimes/FaceB3slime.png</key>
+            <key type="filename">Slimes/FaceB4cat.png</key>
+            <key type="filename">Slimes/FaceB4king.png</key>
+            <key type="filename">Slimes/FaceB4slime.png</key>
+            <key type="filename">Slimes/FaceB5cat.png</key>
+            <key type="filename">Slimes/FaceB5gup.png</key>
+            <key type="filename">Slimes/FaceB5king.png</key>
+            <key type="filename">Slimes/FaceB5slime.png</key>
+            <key type="filename">Slimes/FaceB6cat.png</key>
+            <key type="filename">Slimes/FaceB6gup.png</key>
+            <key type="filename">Slimes/FaceB6king.png</key>
+            <key type="filename">Slimes/FaceB6slime.png</key>
+            <key type="filename">Slimes/FaceB7cat.png</key>
+            <key type="filename">Slimes/FaceB7gup.png</key>
+            <key type="filename">Slimes/FaceB7king.png</key>
+            <key type="filename">Slimes/FaceB7slime.png</key>
+            <key type="filename">Slimes/FaceB8cat.png</key>
+            <key type="filename">Slimes/FaceB8gup.png</key>
+            <key type="filename">Slimes/FaceB8king.png</key>
+            <key type="filename">Slimes/FaceB8slime.png</key>
+            <key type="filename">Slimes/FaceDeadcat.png</key>
+            <key type="filename">Slimes/FaceDeadgup.png</key>
+            <key type="filename">Slimes/FaceDeadking.png</key>
+            <key type="filename">Slimes/FaceDeadslime.png</key>
+            <key type="filename">Slimes/FaceStunnedcat.png</key>
+            <key type="filename">Slimes/FaceStunnedgup.png</key>
+            <key type="filename">Slimes/FaceStunnedking.png</key>
+            <key type="filename">Slimes/FaceStunnedslime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -291,12 +290,10 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">FaceA3gup.png</key>
-            <key type="filename">FaceA4gup.png</key>
-            <key type="filename">FaceB3gup.png</key>
-            <key type="filename">FaceB4gup.png</key>
-            <key type="filename">HeadA12slime.png</key>
-            <key type="filename">HeadA13slime.png</key>
+            <key type="filename">Slimes/FaceA3gup.png</key>
+            <key type="filename">Slimes/FaceA4gup.png</key>
+            <key type="filename">Slimes/FaceB3gup.png</key>
+            <key type="filename">Slimes/FaceB4gup.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -311,10 +308,8 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA0slime.png</key>
-            <key type="filename">HeadA1slime.png</key>
-            <key type="filename">HeadA2slime.png</key>
-            <key type="filename">HeadA3slime.png</key>
+            <key type="filename">Slimes/HeadA0slime.png</key>
+            <key type="filename">Slimes/HeadA4slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -323,14 +318,14 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,4,8,9</rect>
+                <rect>5,5,10,11</rect>
                 <key>scale9Paddings</key>
-                <rect>4,4,8,9</rect>
+                <rect>5,5,10,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA10slime.png</key>
-            <key type="filename">HeadA9slime.png</key>
+            <key type="filename">Slimes/HeadA10slime.png</key>
+            <key type="filename">Slimes/HeadA11slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -339,13 +334,14 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,4,9,8</rect>
+                <rect>6,5,11,11</rect>
                 <key>scale9Paddings</key>
-                <rect>5,4,9,8</rect>
+                <rect>6,5,11,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA11slime.png</key>
+            <key type="filename">Slimes/HeadA12slime.png</key>
+            <key type="filename">Slimes/HeadA7slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -354,13 +350,13 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,4,9,9</rect>
+                <rect>6,6,11,11</rect>
                 <key>scale9Paddings</key>
-                <rect>5,4,9,9</rect>
+                <rect>6,6,11,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA14slime.png</key>
+            <key type="filename">Slimes/HeadA13slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -369,14 +365,13 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,4,10,9</rect>
+                <rect>6,6,12,11</rect>
                 <key>scale9Paddings</key>
-                <rect>5,4,10,9</rect>
+                <rect>6,6,12,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA15slime.png</key>
-            <key type="filename">HeadA16slime.png</key>
+            <key type="filename">Slimes/HeadA14slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -385,13 +380,13 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>6,4,12,7</rect>
+                <rect>6,5,13,11</rect>
                 <key>scale9Paddings</key>
-                <rect>6,4,12,7</rect>
+                <rect>6,5,13,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA17slime.png</key>
+            <key type="filename">Slimes/HeadA15slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -400,13 +395,14 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>6,4,12,8</rect>
+                <rect>7,5,15,9</rect>
                 <key>scale9Paddings</key>
-                <rect>6,4,12,8</rect>
+                <rect>7,5,15,9</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA4slime.png</key>
+            <key type="filename">Slimes/HeadA16slime.png</key>
+            <key type="filename">Slimes/HeadA17slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -415,13 +411,15 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,4,7,9</rect>
+                <rect>7,5,15,10</rect>
                 <key>scale9Paddings</key>
-                <rect>4,4,7,9</rect>
+                <rect>7,5,15,10</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA6slime.png</key>
+            <key type="filename">Slimes/HeadA1slime.png</key>
+            <key type="filename">Slimes/HeadA2slime.png</key>
+            <key type="filename">Slimes/HeadA3slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -430,13 +428,13 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,5,8,10</rect>
+                <rect>5,5,11,11</rect>
                 <key>scale9Paddings</key>
-                <rect>4,5,8,10</rect>
+                <rect>5,5,11,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA7slime.png</key>
+            <key type="filename">Slimes/HeadA5slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -445,14 +443,13 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,5,9,9</rect>
+                <rect>5,6,11,11</rect>
                 <key>scale9Paddings</key>
-                <rect>4,5,9,9</rect>
+                <rect>5,6,11,11</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HeadA8slime.png</key>
-            <key type="filename">LegsAAir1slime.png</key>
+            <key type="filename">Slimes/HeadA6slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -461,13 +458,29 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,4,9,7</rect>
+                <rect>5,6,11,12</rect>
                 <key>scale9Paddings</key>
-                <rect>4,4,9,7</rect>
+                <rect>5,6,11,12</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">HipsAslime.png</key>
+            <key type="filename">Slimes/HeadA8slime.png</key>
+            <key type="filename">Slimes/HeadA9slime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,5,11,10</rect>
+                <key>scale9Paddings</key>
+                <rect>6,5,11,10</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/HipsAslime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -482,23 +495,11 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">LegsA0slime.png</key>
-            <key type="filename">LegsA1slime.png</key>
-            <key type="filename">LegsA2slime.png</key>
-            <key type="filename">LegsA3slime.png</key>
-            <key type="filename">LegsA4slime.png</key>
-            <key type="filename">LegsA5slime.png</key>
-            <key type="filename">LegsA6slime.png</key>
-            <key type="filename">LegsAAir0slime.png</key>
-            <key type="filename">LegsAOnPole0slime.png</key>
-            <key type="filename">LegsAOnPole1slime.png</key>
-            <key type="filename">LegsAOnPole2slime.png</key>
-            <key type="filename">LegsAOnPole3slime.png</key>
-            <key type="filename">LegsAOnPole4slime.png</key>
-            <key type="filename">LegsAOnPole5slime.png</key>
-            <key type="filename">LegsAOnPole6slime.png</key>
-            <key type="filename">LegsAPoleslime.png</key>
-            <key type="filename">LegsAWallslime.png</key>
+            <key type="filename">Slimes/LegsA0slime.png</key>
+            <key type="filename">Slimes/LegsA1slime.png</key>
+            <key type="filename">Slimes/LegsA2slime.png</key>
+            <key type="filename">Slimes/LegsA5slime.png</key>
+            <key type="filename">Slimes/LegsAAir0slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -507,19 +508,14 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,3,9,7</rect>
+                <rect>6,4,11,8</rect>
                 <key>scale9Paddings</key>
-                <rect>5,3,9,7</rect>
+                <rect>6,4,11,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">LegsAClimbing0slime.png</key>
-            <key type="filename">LegsAClimbing1slime.png</key>
-            <key type="filename">LegsAClimbing2slime.png</key>
-            <key type="filename">LegsAClimbing3slime.png</key>
-            <key type="filename">LegsAClimbing4slime.png</key>
-            <key type="filename">LegsAClimbing5slime.png</key>
-            <key type="filename">LegsAClimbing6slime.png</key>
+            <key type="filename">Slimes/LegsA3slime.png</key>
+            <key type="filename">Slimes/LegsA4slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -528,18 +524,111 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>6,3,11,7</rect>
+                <rect>6,4,13,8</rect>
                 <key>scale9Paddings</key>
-                <rect>6,3,11,7</rect>
+                <rect>6,4,13,8</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">LegsACrawling0slime.png</key>
-            <key type="filename">LegsACrawling1slime.png</key>
-            <key type="filename">LegsACrawling2slime.png</key>
-            <key type="filename">LegsACrawling3slime.png</key>
-            <key type="filename">LegsACrawling4slime.png</key>
-            <key type="filename">LegsACrawling5slime.png</key>
+            <key type="filename">Slimes/LegsA6slime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,4,12,9</rect>
+                <key>scale9Paddings</key>
+                <rect>6,4,12,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/LegsAAir1slime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,5,12,9</rect>
+                <key>scale9Paddings</key>
+                <rect>6,5,12,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/LegsAClimbing0slime.png</key>
+            <key type="filename">Slimes/LegsAClimbing1slime.png</key>
+            <key type="filename">Slimes/LegsAClimbing4slime.png</key>
+            <key type="filename">Slimes/LegsAClimbing5slime.png</key>
+            <key type="filename">Slimes/LegsAClimbing6slime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,4,13,9</rect>
+                <key>scale9Paddings</key>
+                <rect>7,4,13,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/LegsAClimbing2slime.png</key>
+            <key type="filename">Slimes/LegsAClimbing3slime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>7,4,13,8</rect>
+                <key>scale9Paddings</key>
+                <rect>7,4,13,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/LegsACrawling0slime.png</key>
+            <key type="filename">Slimes/LegsACrawling2slime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,5,16,9</rect>
+                <key>scale9Paddings</key>
+                <rect>8,5,16,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/LegsACrawling1slime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,5,17,9</rect>
+                <key>scale9Paddings</key>
+                <rect>8,5,17,9</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/LegsACrawling3slime.png</key>
+            <key type="filename">Slimes/LegsACrawling4slime.png</key>
+            <key type="filename">Slimes/LegsACrawling5slime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -554,7 +643,14 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">LegsAVerticalPoleslime.png</key>
+            <key type="filename">Slimes/LegsAOnPole0slime.png</key>
+            <key type="filename">Slimes/LegsAOnPole1slime.png</key>
+            <key type="filename">Slimes/LegsAOnPole2slime.png</key>
+            <key type="filename">Slimes/LegsAOnPole3slime.png</key>
+            <key type="filename">Slimes/LegsAOnPole4slime.png</key>
+            <key type="filename">Slimes/LegsAOnPole5slime.png</key>
+            <key type="filename">Slimes/LegsAOnPole6slime.png</key>
+            <key type="filename">Slimes/LegsAPoleslime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -563,16 +659,46 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>2,3,3,5</rect>
+                <rect>6,4,11,9</rect>
                 <key>scale9Paddings</key>
-                <rect>2,3,3,5</rect>
+                <rect>6,4,11,9</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">Outlinecat.png</key>
-            <key type="filename">Outlinegup.png</key>
-            <key type="filename">Outlineking.png</key>
-            <key type="filename">Outlineslime.png</key>
+            <key type="filename">Slimes/LegsAVerticalPoleslime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,4,5,8</rect>
+                <key>scale9Paddings</key>
+                <rect>3,4,5,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/LegsAWallslime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,3,9,7</rect>
+                <key>scale9Paddings</key>
+                <rect>5,3,9,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/Outlinecat.png</key>
+            <key type="filename">Slimes/Outlinegup.png</key>
+            <key type="filename">Slimes/Outlineking.png</key>
+            <key type="filename">Slimes/Outlineslime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -587,32 +713,22 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">PlayerArm0van.png</key>
-            <key type="filename">PlayerArm0vanslime.png</key>
-            <key type="filename">PlayerArm10van.png</key>
-            <key type="filename">PlayerArm10vanslime.png</key>
-            <key type="filename">PlayerArm11van.png</key>
-            <key type="filename">PlayerArm11vanslime.png</key>
-            <key type="filename">PlayerArm12van.png</key>
-            <key type="filename">PlayerArm12vanslime.png</key>
-            <key type="filename">PlayerArm1van.png</key>
-            <key type="filename">PlayerArm1vanslime.png</key>
-            <key type="filename">PlayerArm2van.png</key>
-            <key type="filename">PlayerArm2vanslime.png</key>
-            <key type="filename">PlayerArm3van.png</key>
-            <key type="filename">PlayerArm3vanslime.png</key>
-            <key type="filename">PlayerArm4van.png</key>
-            <key type="filename">PlayerArm4vanslime.png</key>
-            <key type="filename">PlayerArm5van.png</key>
-            <key type="filename">PlayerArm5vanslime.png</key>
-            <key type="filename">PlayerArm6van.png</key>
-            <key type="filename">PlayerArm6vanslime.png</key>
-            <key type="filename">PlayerArm7van.png</key>
-            <key type="filename">PlayerArm7vanslime.png</key>
-            <key type="filename">PlayerArm8van.png</key>
-            <key type="filename">PlayerArm8vanslime.png</key>
-            <key type="filename">PlayerArm9van.png</key>
-            <key type="filename">PlayerArm9vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm0van.png</key>
+            <key type="filename">Slimes/PlayerArm0vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm10van.png</key>
+            <key type="filename">Slimes/PlayerArm11van.png</key>
+            <key type="filename">Slimes/PlayerArm12van.png</key>
+            <key type="filename">Slimes/PlayerArm1van.png</key>
+            <key type="filename">Slimes/PlayerArm1vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm2van.png</key>
+            <key type="filename">Slimes/PlayerArm2vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm3van.png</key>
+            <key type="filename">Slimes/PlayerArm4van.png</key>
+            <key type="filename">Slimes/PlayerArm5van.png</key>
+            <key type="filename">Slimes/PlayerArm6van.png</key>
+            <key type="filename">Slimes/PlayerArm7van.png</key>
+            <key type="filename">Slimes/PlayerArm8van.png</key>
+            <key type="filename">Slimes/PlayerArm9van.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -627,10 +743,48 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">floobertcat.png</key>
-            <key type="filename">floobertgup.png</key>
-            <key type="filename">floobertking.png</key>
-            <key type="filename">floobertslime.png</key>
+            <key type="filename">Slimes/PlayerArm10vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm11vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm12vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm4vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm5vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm6vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm7vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm8vanslime.png</key>
+            <key type="filename">Slimes/PlayerArm9vanslime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,3,16,6</rect>
+                <key>scale9Paddings</key>
+                <rect>8,3,16,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/PlayerArm3vanslime.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>8,2,16,4</rect>
+                <key>scale9Paddings</key>
+                <rect>8,2,16,4</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">Slimes/floobertcat.png</key>
+            <key type="filename">Slimes/floobertgup.png</key>
+            <key type="filename">Slimes/floobertking.png</key>
+            <key type="filename">Slimes/floobertslime.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -645,7 +799,7 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">lighterBlade.png</key>
+            <key type="filename">Slimes/lighterBlade.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -660,8 +814,8 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">lighterClosed.png</key>
-            <key type="filename">lighterOpen.png</key>
+            <key type="filename">Slimes/lighterClosed.png</key>
+            <key type="filename">Slimes/lighterOpen.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -679,7 +833,7 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>.</filename>
+            <filename>Slimes</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

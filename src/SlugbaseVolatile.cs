@@ -65,7 +65,8 @@ namespace TheVolatile
         private void GameSession_ctor(On.GameSession.orig_ctor orig, GameSession self, RainWorldGame game)
         {
             orig(self, game);
-            CustomAtlases.FetchAtlas("Atlas");
+            CustomAtlases.FetchAtlas("Slimes");
+            CustomAtlases.FetchAtlas("Shrines");
         }
 
         private void Player_SlugcatGrab(On.Player.orig_SlugcatGrab orig, Player self, PhysicalObject obj, int graspUsed)
@@ -242,34 +243,33 @@ namespace TheVolatile
                         }
                     }
                 }
-            }
-
-            { // \/ food size shit \/
-                float foodFactor;
-                if (!self.room.game.IsArenaSession)
-                    foodFactor = Mathf.Lerp(0.5f, 1.0f, (float)(self.FoodInStomach) / (float)(self.MaxFoodInStomach) + .4f);
-                else
-                    foodFactor = 1f;
+                { // \/ food size shit \/
+                    float foodFactor;
+                    if (!self.room.game.IsArenaSession)
+                        foodFactor = Mathf.Lerp(0.5f, 1.0f, (float)(self.FoodInStomach) / (float)(self.MaxFoodInStomach) + .4f);
+                    else
+                        foodFactor = 1f;
 
 
-                self.bounce = .4f;
-                if (self.animation == Player.AnimationIndex.Roll) {
-                    self.bodyChunks[0].rad = 14 * foodFactor;
-                    self.bodyChunks[1].rad = 14 * foodFactor;
-                    self.bodyChunkConnections[0].distance = 5 * (foodFactor + .3f);
-                } else if (self.animation == Player.AnimationIndex.GrapplingSwing || self.bodyMode == Player.BodyModeIndex.CorridorClimb) {
-                    self.bounce = .1f;
-                    self.bodyChunks[0].rad = 7 * foodFactor;
-                    self.bodyChunks[1].rad = 7 * foodFactor;
-                    self.bodyChunkConnections[0].distance = 25 * (foodFactor + .3f);
-                } else {
-                    self.bodyChunks[0].rad = foodFactor * 9;
-                    self.bodyChunks[1].rad = foodFactor * 8;
-                    self.bodyChunkConnections[0].distance = 17 * foodFactor;
+                    self.bounce = .4f;
+                    if (self.animation == Player.AnimationIndex.Roll) {
+                        self.bodyChunks[0].rad = 14 * foodFactor;
+                        self.bodyChunks[1].rad = 14 * foodFactor;
+                        self.bodyChunkConnections[0].distance = 5 * (foodFactor + .3f);
+                    } else if (self.animation == Player.AnimationIndex.GrapplingSwing || self.bodyMode == Player.BodyModeIndex.CorridorClimb) {
+                        self.bounce = .1f;
+                        self.bodyChunks[0].rad = 7 * foodFactor;
+                        self.bodyChunks[1].rad = 7 * foodFactor;
+                        self.bodyChunkConnections[0].distance = 25 * (foodFactor + .3f);
+                    } else {
+                        self.bodyChunks[0].rad = foodFactor * 9;
+                        self.bodyChunks[1].rad = foodFactor * 8;
+                        self.bodyChunkConnections[0].distance = 17 * foodFactor;
+                    }
+
+                    self.bodyChunks[0].mass = foodFactor * 0.4f;
+                    self.bodyChunks[1].mass = foodFactor * 0.3f;
                 }
-
-                self.bodyChunks[0].mass = foodFactor * 0.4f;
-                self.bodyChunks[1].mass = foodFactor * 0.3f;
             }
         }
 
