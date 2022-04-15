@@ -21,16 +21,17 @@ namespace TheVolatile.PlacedObs
             base.Update(eu);
 
             pos = room.MiddleOfTile(pObj.pos) + offset + new Vector2(0, -35);
-
+            interactionRange = false;
             if (!hit) {
                 if (pObj != null) {
                     if (room != null && room.world != null && room.world.game != null) {
                         for (int i = 0; i < room.world.game.Players.Count; i++) {
                             if (room.world.game.Players[i] != null && !room.world.game.Players[i].slatedForDeletion && room.world.game.Players[i].realizedCreature != null) {
                                 Player player = room.world.game.Players[i].realizedCreature as Player;
-
                                 for (int g = 0; g < player.grasps.Length; g++) {
-                                    if (Vector2.Distance(player.firstChunk.pos, this.pos) < 40 && player.input[0].thrw) {
+                                    interactionRange = Vector2.Distance(player.firstChunk.pos, this.pos) < 40;
+
+                                    if (interactionRange && player.input[0].thrw) {
                                         Hit(/*sword.firstChunk*/);
                                     }
                                 }
@@ -96,7 +97,7 @@ namespace TheVolatile.PlacedObs
             sLeaser.sprites[2].SetPosition(vector - camPos);
             sLeaser.sprites[3].SetPosition(vector - camPos);
 
-            sLeaser.sprites[0].isVisible = !hit;
+            sLeaser.sprites[0].isVisible = !hit && interactionRange;
             sLeaser.sprites[1].isVisible = !hit;
             sLeaser.sprites[2].alpha = .9f;
             sLeaser.sprites[3].alpha = .8f;
@@ -105,6 +106,7 @@ namespace TheVolatile.PlacedObs
         readonly Vector2 offset = new Vector2(0f, 35f);
         public PlacedObject pObj;
         public Creature hitter;
+        public bool interactionRange;
         public bool hit;
         public List<IntVector2> tiles = new List<IntVector2>();
     }

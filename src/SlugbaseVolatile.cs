@@ -1,14 +1,13 @@
-﻿using SlugBase;
-using System;
-using System.Linq;
-using UnityEngine;
+﻿using HUD;
 using RWCustom;
-using MonoMod.Cil;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using System.Reflection;
-using System.IO;
+using SlugBase;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
 
 namespace TheVolatile
 {
@@ -16,7 +15,7 @@ namespace TheVolatile
     {
         public static SlugbaseVolatile instance;
 
-        
+
 
         public SlugbaseVolatile() : base("The Volatile", FormatVersion.V1, 0, true)
         {
@@ -34,11 +33,84 @@ namespace TheVolatile
             On.Player.CanBeSwallowed += Player_CanBeSwallowed;
             On.Player.Grabability += Player_Grabability;
             On.Player.SlugcatGrab += Player_SlugcatGrab;
+            On.Player.UpdateAnimation += Player_UpdateAnimation;
+
             On.SharedPhysics.TraceProjectileAgainstBodyChunks += SharedPhysics_TraceProjectileAgainstBodyChunks;
 
             On.GameSession.ctor += GameSession_ctor;
             On.ScavengerAI.CollectScore_PhysicalObject_bool += ScavengerAI_CollectScore_PhysicalObject_bool;
+
+            On.HUD.Map.Update += Map_Update;
         }
+
+        private void Player_UpdateAnimation(On.Player.orig_UpdateAnimation orig, Player self)
+        {
+            bool doIt = false;
+            if (IsMe(self) && self.animation == Player.AnimationIndex.RocketJump) {
+                self.bodyMode = Player.BodyModeIndex.Default;
+                doIt = true;
+            }
+            orig(self);
+            if (doIt) {
+                self.standing = false;
+                self.bodyChunks[1].vel *= 0.99f;
+                Vector2 normalized = self.bodyChunks[0].vel.normalized;
+                self.bodyChunks[0].vel += normalized;
+                self.bodyChunks[1].vel -= normalized;
+                self.bodyChunks[0].vel.y = self.bodyChunks[0].vel.y + 0.1f;
+                self.bodyChunks[1].vel.y = self.bodyChunks[1].vel.y + 0.1f;
+
+                self.bodyChunks[0].vel.x *= 1.015f;
+                self.bodyChunks[1].vel.x *= 1.015f;
+                self.bodyChunks[0].vel.y *= 1.025f;
+                self.bodyChunks[1].vel.y *= 1.025f;
+
+                if (self.bodyChunks[1].ContactPoint.x != 0 || self.bodyChunks[1].ContactPoint.y != 0) {
+                    self.animation = Player.AnimationIndex.None;
+                }
+            }
+            }
+
+        List<AbstractRoom> spottingJobs = new List<AbstractRoom>();
+
+        private void Map_Update(On.HUD.Map.orig_Update orig, HUD.Map self)
+        {
+            if(spottingJobs.Count > 0) {
+                AbstractRoom absRoom = spottingJobs.Pop();
+
+                RoomSettings sets = new RoomSettings(absRoom.name, (self.hud.owner as Player).room.world.region, false, false, (self.hud.owner as Player).room.world.game.StoryCharacter);
+                foreach (PlacedObject pObj in sets.placedObjects.Where(x => x.type == EnumExt_Volatile.MountainShrine)) {
+                    challengeSpots.Add(new ChallengeSpot(pObj.pos, absRoom));
+                }
+            }
+
+            orig(self);
+
+            challengePingCounter++;
+            if (self.hud.owner is Player p && IsMe(p.room?.game) && challengePingCounter == challengePingInterval) {
+                challengePingCounter = 0;
+
+                foreach (ChallengeSpot challengeSpot in challengeSpots) {
+
+                    Vector2 screenPos = self.RoomToMapPos(challengeSpot.pos, challengeSpot.room.index, 1f);
+
+                    if (screenPos.x > 0f && screenPos.x < self.hud.rainWorld.screenSize.x && screenPos.y > 0f && screenPos.y < self.hud.rainWorld.screenSize.y) {
+
+                        Vector2 texturePos = self.OnTexturePos(challengeSpot.pos, challengeSpot.room.index, true) / self.DiscoverResolution;
+
+                        if (self.revealTexture.GetPixel((int)texturePos.x, (int)texturePos.y).r == 1f) {
+                            var swarmCircle = new Map.SwarmCircle(self, challengeSpot.pos, challengeSpot.room.index);
+                            self.swarmCircles.Add(swarmCircle);
+                            swarmCircle.circle.color = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        static int challengePingCounter = 0;
+        const int challengePingInterval = 25;
+        static List<ChallengeSpot> challengeSpots = new List<ChallengeSpot>();
 
         private SharedPhysics.CollisionResult SharedPhysics_TraceProjectileAgainstBodyChunks(On.SharedPhysics.orig_TraceProjectileAgainstBodyChunks orig, SharedPhysics.IProjectileTracer projTracer, Room room, Vector2 lastPos, ref Vector2 pos, float rad, int collisionLayer, PhysicalObject exemptObject, bool hitAppendages)
         {
@@ -56,7 +128,7 @@ namespace TheVolatile
 
         private int ScavengerAI_CollectScore_PhysicalObject_bool(On.ScavengerAI.orig_CollectScore_PhysicalObject_bool orig, ScavengerAI self, PhysicalObject obj, bool weaponFiltered)
         {
-            if(obj is Lighter) {
+            if (obj is Lighter) {
                 return 0;
             }
             return orig(self, obj, weaponFiltered);
@@ -91,7 +163,7 @@ namespace TheVolatile
 
         private bool Player_CanBeSwallowed(On.Player.orig_CanBeSwallowed orig, Player self, PhysicalObject testObj)
         {
-            if(testObj is Lighter) {
+            if (testObj is Lighter) {
                 return false;
             }
             return orig(self, testObj);
@@ -111,40 +183,11 @@ namespace TheVolatile
             if (!(self.grasps[grasp]?.grabbed is Lighter lig && releaseInterrupt(self, lig))) orig(self, grasp);
         }
 
-        //private void IL_Player_ThrowObject(MonoMod.Cil.ILContext il)
-        //{
-        //    ILCursor baba = new ILCursor(il);
-        //    ILCursor keke = new ILCursor(il);
-
-        //    baba.GotoNext(
-        //        x => x.MatchLdarg(0),
-        //        x => x.MatchLdarg(1),
-        //        x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp"));
-        //    Debug.Log("baba move");
-
-        //    baba.Emit(OpCodes.Ldarg_0);
-        //    baba.Emit(OpCodes.Ldarg_1);
-        //    Debug.Log("baba emit ldargs");
-        //    baba.EmitDelegate<Func<Player, int, bool>>((ply, grasp) => {
-        //        var obj = ply.grasps[grasp].grabbed;
-        //        return releaseInterrupt(ply, obj);
-        //    });
-        //    Debug.Log("baba emit delegate");
-
-        //    ILLabel release = keke.DefineLabel();
-        //    keke.GotoNext(x => x.MatchCallOrCallvirt<Player>("ReleaseGrasp"));
-        //    Debug.Log("keke move");
-        //    release = keke.MarkLabel();
-
-        //    baba.Emit(OpCodes.Brtrue, release);
-        //    Debug.Log("baba emit brtrue");
-        //}
-
         private void Creature_Violence(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
         {
-            if(self is Player p && IsMe(p) && type == Creature.DamageType.Explosion) {
+            if (self is Player p && IsMe(p) && type == Creature.DamageType.Explosion) {
                 orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, 0, 0);
-            } else orig(self,source,directionAndMomentum,hitChunk,hitAppendage,type,damage,stunBonus);
+            } else orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
         }
 
         private void Player_ctor(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -152,8 +195,13 @@ namespace TheVolatile
             orig(self, abstractCreature, world);
             if (IsMe(self)) {
                 self.bounce = 0.4f;
+
+                foreach (AbstractRoom absRoomName in self.room.world.abstractRooms) {
+                    spottingJobs.Add(absRoomName);
+                }
             }
         }
+
         private class LighterStick : AbstractPhysicalObject.AbstractObjectStick
         {
             public LighterStick(AbstractPhysicalObject A, AbstractPhysicalObject B) : base(A, B)
@@ -180,7 +228,7 @@ namespace TheVolatile
             orig(self, eu);
             if (IsMe(self)) {
                 Lighter l = Lighter.getMine(self);
-                if(self.animation == Player.AnimationIndex.BellySlide) {
+                if (self.animation == Player.AnimationIndex.BellySlide) {
                     self.animation = Player.AnimationIndex.Roll;
                 }
 
@@ -189,9 +237,10 @@ namespace TheVolatile
                     abstractLighter.RealizeInRoom();
 
                     self.abstractCreature.stuckObjects.Add(new LighterStick(self.abstractPhysicalObject, abstractLighter));
+
                 } else {
 
-                    if(self.room.abstractRoom.name == "SB_L01") {
+                    if (self.room.abstractRoom.name == "SB_L01") {
                         l.Destroy();
                     }
 
@@ -229,12 +278,12 @@ namespace TheVolatile
                     }
 
                     if (self.animation == Player.AnimationIndex.RocketJump) {
-                        if(l.bladeMode)
+                        if (l.bladeMode)
                             l.room.PlaySound(SoundID.Spear_Bounce_Off_Wall, l.firstChunk, false, 1f, .8f);
                         l.bladeMode = false;
                     }
 
-                    if (self.rollCounter >= 10 && self.animation == Player.AnimationIndex.Roll) { 
+                    if (self.rollCounter >= 10 && self.animation == Player.AnimationIndex.Roll) {
                         if (l.rollRep >= 2) {
                             l.rollRep = 0;
                         } else {
@@ -282,7 +331,7 @@ namespace TheVolatile
 
             if (IsMe(self.player)) {
                 var myContainer = sLeaser.containers?.FirstOrDefault(x => x.data is string s && s == "slime");
-                if(myContainer != null) {
+                if (myContainer != null) {
                     newContatiner.AddChild(myContainer);
                 }
             }
@@ -341,8 +390,8 @@ namespace TheVolatile
                         mSprite.scaleX = vSprite.scaleX;
                         mSprite.scaleY = vSprite.scaleY;
 
-                        if(vSprite != null)
-                        mSprite.SetElementByName(vSprite.element.name + "slime");
+                        if (vSprite != null)
+                            mSprite.SetElementByName(vSprite.element.name + "slime");
                     }
                     if (i == 6 || i == 5) { //arms
                         mSprite.isVisible = vSprite.isVisible;
@@ -380,7 +429,7 @@ namespace TheVolatile
                 for (int j = tailMesh.vertices.Length - 1; j >= 0; j--) {
                     float num = (float)(j / 2) / (float)(tailMesh.vertices.Length / 2);
                     Vector2 vector;
-                    if (j % 2 == 0) {                                                                
+                    if (j % 2 == 0) {
                         vector = new Vector2(num, 0f);
                     } else if (j < tailMesh.vertices.Length - 1) {
                         vector = new Vector2(num, 1f);
@@ -517,13 +566,25 @@ namespace TheVolatile
         public override void StartNewGame(Room room)
         {
             base.StartNewGame(room);
-            if(room.game.session is StoryGameSession sgs) {
+            if (room.game.session is StoryGameSession sgs) {
                 sgs.saveState.deathPersistentSaveData.karma = 2;
             }
 
 
             if (room.abstractRoom.name != StartRoom) return;
             if (SlimeConsole.LM) room.AddObject(new SlimeStart(room));
+        }
+    }
+    
+    public struct ChallengeSpot
+    {
+        public Vector2 pos;
+        public AbstractRoom room;
+
+        public ChallengeSpot(Vector2 vec2, AbstractRoom absR)
+        {
+            pos = vec2;
+            room = absR;
         }
     }
 }
