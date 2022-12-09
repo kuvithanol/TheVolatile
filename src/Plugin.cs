@@ -6,6 +6,8 @@ using BepInEx;
 using BepInEx.Logging;
 using SlugBase;
 using UnityEngine;
+using Fisobs.Items;
+using Fisobs.Core;
 
 namespace TheVolatile
 {
@@ -18,10 +20,10 @@ namespace TheVolatile
         {
             On.RainWorld.Start += RainWorld_Start;
             On.Room.ctor += Room_ctor;
-            FisobRegistry fisobs = new FisobRegistry(new Fisob[] { FisLighter.Instance });
-            fisobs.ApplyHooks();
+            Content.Register(new Fisob[] { FisLighter.Instance });
+
             SlimeConsole.Apply();
-            PlacedObs.PlacedObs.Apply();
+            //PlacedObs.PlacedObs.Apply();
         }
 
         public void OnDisable()

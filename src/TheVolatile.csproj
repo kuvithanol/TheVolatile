@@ -15,7 +15,6 @@
     <None Remove="Atlases\lighterOpen.png" />
     <None Remove="Atlases\lighterOpen.txt" />
     <None Remove="Atlases\Shrines.png" />
-    <None Remove="Atlases\Shrines.txt" />
     <None Remove="Atlases\Slimes.png" />
     <None Remove="Atlases\Slimes.txt" />
     <None Remove="graphics\Scenes\NewDeath\FlowerA.png" />
@@ -54,7 +53,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Atlases\Shrines.txt" />
     <EmbeddedResource Include="Atlases\Slimes.png" />
     <EmbeddedResource Include="Atlases\Slimes.txt" />
     <EmbeddedResource Include="graphics\Scenes\NewDeath\FlowerA.png">
@@ -94,40 +92,43 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\RWreferences\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>..\..\..\RWreferences\BepInEx.dll</HintPath>
-    </Reference>
-    <Reference Include="DevConsole">
-      <HintPath>..\..\..\RWreferences\DevConsole.dll</HintPath>
-    </Reference>
-    <Reference Include="EnumExtender">
-      <HintPath>..\..\..\RWreferences\EnumExtender.dll</HintPath>
-    </Reference>
-    <Reference Include="HOOKS-Assembly-CSharp">
-      <HintPath>..\..\..\RWreferences\HOOKS-Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>..\..\..\rwbeplibs\Mono.Cecil.dll</HintPath>
-    </Reference>
-    <Reference Include="MonoMod.Utils">
-      <HintPath>..\..\..\rwbeplibs\MonoMod.Utils.dll</HintPath>
-    </Reference>
-    <Reference Include="Partiality">
-      <HintPath>..\..\..\RWreferences\Partiality.dll</HintPath>
-    </Reference>
-    <Reference Include="SlugBase">
-      <HintPath>..\..\..\RWreferences\SlugBase.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\RWreferences\UnityEngine.dll</HintPath>
-    </Reference>
+    <Folder Include="obj\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="obj\" />
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\DragonSlayer\Refs\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\DragonSlayer\Refs\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="DevConsole">
+      <HintPath>..\..\DragonSlayer\Refs\DevConsole.dll</HintPath>
+    </Reference>
+    <Reference Include="EnumExtender">
+      <HintPath>..\..\DragonSlayer\Refs\EnumExtender.dll</HintPath>
+    </Reference>
+    <Reference Include="Fisobs">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Rain World\BepInEx\realm\backups\Fisobs.dll</HintPath>
+    </Reference>
+    <Reference Include="HOOKS-Assembly-CSharp">
+      <HintPath>..\..\DragonSlayer\Refs\HOOKS-Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\DragonSlayer\Refs\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\DragonSlayer\Refs\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\..\DragonSlayer\Refs\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="SlugBase">
+      <HintPath>..\..\DragonSlayer\Refs\SlugBase.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\DragonSlayer\Refs\UnityEngine.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

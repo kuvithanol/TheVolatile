@@ -7,6 +7,7 @@ namespace TheVolatile
 {
     public static class EnumExt_Volatile
     {
-        public static PlacedObject.Type MountainShrine;
+        public static AbstractPhysicalObject.AbstractObjectType Lighter;
+        //public static PlacedObject.Type MountainShrine;
     }
 }

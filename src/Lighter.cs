@@ -1,4 +1,6 @@
-﻿using Noise;
+﻿using Fisobs.Core;
+using Fisobs.Sandbox;
+using Noise;
 using RWCustom;
 using System;
 using System.Collections.Generic;
@@ -9,37 +11,16 @@ namespace TheVolatile
     public class Lighter : Rock
     {
         public int rollRep = 0;
-        public Player player;
-        public int timeSinceClick = 0;
+        public int grabHoldLength = 0;
         bool open = false;
         public bool lit = false;
-        public bool bladeOut = false;
-        bool iveBeenOpen = false;
-        int delay = 0;
-        const int resetDelay = 20;
-        public static List<Lighter> allLighters = new List<Lighter>();
-        public bool bladeMode = false;
         public int timeSinceUsed = 0;
-        
 
-        public void revealBlade()
-        {
-            if (!bladeOut) {
-                room.PlaySound(SoundID.Bullet_Drip_Strike, firstChunk.pos, 1.5f, 1f);
-                for (int i = 0; i < 10; i++) 
-                    room.AddObject(new Spark(firstChunk.pos, UnityEngine.Random.insideUnitCircle * 3 + rotation * 7 + firstChunk.vel, Color.white, null, 5, 18));
-                }
-            timeSinceUsed = 0;
-            bladeOut = true;
-        }
+        bool bladeOwned = false;
+        public Player player;
+        //const int resetDelay = 20;
+        public static List<Lighter> allLighters = new List<Lighter>();
 
-        public void activateBladeMode()
-        {
-            if (!bladeMode)
-                room.PlaySound(SoundID.Slugcat_Pick_Up_Spear, firstChunk.pos, 2f, 1.2f);
-            lit = false;
-            bladeMode = true;
-        }
 
         public Lighter(AbstractPhysicalObject abstractPhysicalObject, World world, Player player) : base(abstractPhysicalObject, world)
         {
@@ -48,6 +29,7 @@ namespace TheVolatile
 
             soundLoop.sound = SoundID.Fire_Spear_Ignite;
             soundLoop.Start();
+#warning sound loop does nothing
 
             this.flicker = new float[2, 3];
             for (int i = 0; i < this.flicker.GetLength(0); i++) {
@@ -65,63 +47,59 @@ namespace TheVolatile
                 }
             }
             return null;
-        }
+        } // finds the lighter of a given player
         
 
         bool firstTickOfExisting = true;
         public override void Update(bool eu)
         {
             if (firstTickOfExisting) {
-                player.Grab(this, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false);
-            }
-            base.Update(eu);
-            firstTickOfExisting = false;
 
-            if(player.animation == Player.AnimationIndex.Roll && (player.room.game.IsArenaSession || (player.room.game.session is StoryGameSession sgs && sgs.saveState.deathPersistentSaveData.theMark)) && ((player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) || (player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this))) {
-                activateBladeMode();
+                player.Grab(this, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); // player grabs the lighter when it is spawned in, and blade ownership is decided
+                if (player.room.game.IsArenaSession || (player.room.game.session is StoryGameSession sgs && sgs.saveState.deathPersistentSaveData.theMark)) {
+                    bladeOwned = true;
+                }
+
+                firstTickOfExisting = false;
             }
+
+            base.Update(eu);
 
             if (player.input[0].pckp && ((player.grasps[0]?.grabbed != null && player.grasps[0]?.grabbed == this) || (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this))) {
-                 
-                    timeSinceClick++;
-                    if (timeSinceClick > 8) {
-                        open = true;
-                    }
-                    if (open && delay == 0 && (player.FoodInStomach > 0) && !bladeMode) {
-                        lit = true;
-                        soundLoop.Volume = 1;
-                    }
-                    if (open && bladeMode && timeSinceClick > 10) { 
-                        revealBlade();
-                    }
-                
+                grabHoldLength++;
             } else {
-                timeSinceClick = 0;
-                open = bladeMode;
+                grabHoldLength = 0;
+            }  // identifies how long the player has held grab for
+
+            if (grabHoldLength >= 7) {
+                if (grabHoldLength == 7) {
+                    room.PlaySound(SoundID.Snail_Warning_Click, firstChunk.pos, 0.8f, 2.5f);
+                }
+                open = true;
+            } else {
+                if (open && bladeOwned) {
+                    for (int i = 0; i < 7; i++)
+                        room.AddObject(new Spark(firstChunk.pos, UnityEngine.Random.insideUnitCircle * 3 + rotation * 7 + firstChunk.vel, Color.white, null, 5, 18));
+                    room.PlaySound(SoundID.Bullet_Drip_Strike, firstChunk.pos, 1.5f, 1f);
+                }
+
+                open = false;
+            }  // manages the open and closed state of the lighter, as well as vfx for it
+
+            if (open && player.FoodInStomach > 0 && timeSinceUsed >= 10) {
+                lit = true;
+            } else {
+                timeSinceUsed++;
                 lit = false;
-                soundLoop.Volume = 0;
-            }
+            }  // manages the lit and unlit state of the lighter
 
-            if(timeSinceUsed >= 10) {
-                bladeOut = false;
-            }else timeSinceUsed++;
 
-            
 
-            if(Plugin.r.Next(7) <= (int)semiCost && lit) {
+
+
+            if (Plugin.r.Next(7) <= (int)semiCost && lit) {
                 room.AddObject(new HolyFire.HolyFireSprite(firstChunk.pos + new Vector2(0, 4)));
-            }
-
-            if (delay != 0) delay--;
-
-            if(!iveBeenOpen && open) {
-                room.PlaySound(SoundID.Snail_Warning_Click, firstChunk.pos, 0.8f, 2f);
-            }
-
-
-            if(mode != Mode.Thrown && grabbedBy.Count == 0) {
-                bladeMode = false;
-            }
+            }  // randomly adds holyfire particles to lighter, when appropriate
 
             #region LightBullshit
             for (int i = 0; i < this.flicker.GetLength(0); i++) {
@@ -146,12 +124,7 @@ namespace TheVolatile
                 }
             }
             #endregion
-
-            iveBeenOpen = open;
         }
-
-        float[,] flicker;
-        LightSource lightSource;
 
         enumSemicost semiCost = Lighter.enumSemicost.no;
         enum enumSemicost
@@ -180,10 +153,9 @@ namespace TheVolatile
         {
             timeSinceUsed = 0;
             if (!lit)
-                base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, bladeMode ? frc*1.3f : frc, eu);
+                base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc * 1.3f, eu);
             else {
                 if(!SlimeConsole.infBoom)
-                delay = resetDelay;
                 if (player.superLaunchJump < 20)
                     splode();
                 else bigSplode();
@@ -250,14 +222,13 @@ namespace TheVolatile
             this.vibrate = 20;
             this.ChangeMode(Weapon.Mode.Free);
             if (result.obj is Creature) {
-                (result.obj as Creature).Violence(base.firstChunk, new Vector2?(base.firstChunk.vel * base.firstChunk.mass), result.chunk, result.onAppendagePos, Creature.DamageType.Blunt, bladeMode ? 0.6f : 0.01f, bladeMode ? 100f : 45f);
-                if(bladeOut) bladeMode = false;
+                (result.obj as Creature).Violence(base.firstChunk, new Vector2?(base.firstChunk.vel * base.firstChunk.mass), result.chunk, result.onAppendagePos, bladeOwned ? Creature.DamageType.Stab : Creature.DamageType.Blunt, bladeOwned ? 0.4f : 0.01f, bladeOwned ? 75f : 45f);
             } else if (result.chunk != null) result.chunk.vel += base.firstChunk.vel * base.firstChunk.mass / result.chunk.mass; else if (result.onAppendagePos != null) (result.obj as PhysicalObject.IHaveAppendages).ApplyForceOnAppendage(result.onAppendagePos, base.firstChunk.vel * base.firstChunk.mass);
             
             base.firstChunk.vel = base.firstChunk.vel * -0.5f + Custom.DegToVec(UnityEngine.Random.value * 360f) * Mathf.Lerp(0.1f, 0.4f, UnityEngine.Random.value) * base.firstChunk.vel.magnitude;
             
             this.room.PlaySound(SoundID.Rock_Hit_Creature, base.firstChunk);
-            if (bladeOut) this.room.PlaySound(SoundID.Spear_Bounce_Off_Wall, base.firstChunk, false, 1.2f, .8f);
+            if (bladeOwned) this.room.PlaySound(SoundID.Spear_Dislodged_From_Creature, base.firstChunk, false, 1.2f, .8f);
 
             if (result.chunk != null) this.room.AddObject(new ExplosionSpikes(this.room, result.chunk.pos + Custom.DirVec(result.chunk.pos, result.collisionPoint) * result.chunk.rad, 5, 2f, 4f, 4.5f, 30f, new Color(1f, 1f, 1f, 0.5f)));
             
@@ -275,6 +246,8 @@ namespace TheVolatile
             }
         }
 
+        float[,] flicker;
+        LightSource lightSource;
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             Vector2 a = Vector2.Lerp(base.firstChunk.lastPos, base.firstChunk.pos, timeStacker);
@@ -283,7 +256,7 @@ namespace TheVolatile
             }
             sLeaser.sprites[0].x = a.x - camPos.x;
             sLeaser.sprites[0].y = a.y - camPos.y;
-            sLeaser.sprites[0].element = bladeOut ? new FSprite("lighterBlade").element : open ? new FSprite("lighterOpen").element : new FSprite("lighterClosed").element;
+            sLeaser.sprites[0].element = open ? new FSprite("lighterOpen").element : bladeOwned ? new FSprite("lighterBlade").element : new FSprite("lighterClosed").element;
             sLeaser.sprites[0].rotation = Custom.AimFromOneVectorToAnother(new Vector2(0f, 0f), Vector3.Slerp(this.lastRotation, this.rotation, timeStacker));
             sLeaser.sprites[0].scaleX = (player.grasps[0]?.grabbed == null && player.grasps[1]?.grabbed != null && player.grasps[1]?.grabbed == this) ? -1f : 1f;
 
@@ -367,7 +340,7 @@ namespace TheVolatile
                 default: return 1;
             }
         }
-
+        //these both help dictate the sizes of the floobert's segments
 
         TriangleMesh mesh;
 
@@ -467,9 +440,9 @@ namespace TheVolatile
         }
     }
 
-    public class FisLighter : Fisob
+    public class FisLighter : Fisobs.Items.Fisob
     {
-        public FisLighter() : base("Lighter")
+        public FisLighter() : base(EnumExt_Volatile.Lighter)
         {
 
         }
@@ -481,9 +454,9 @@ namespace TheVolatile
             //put your atlas loading bullshit here
         }
 
-        public override AbstractPhysicalObject Parse(World world, EntitySaveData saveData)
+        public override AbstractPhysicalObject Parse(World world, Fisobs.Core.EntitySaveData entitySaveData, SandboxUnlock? unlock)
         {
-            Debug.Log("if you can read this, sorry !");
+            Debug.Log("tell ethanol that the game is parsing a lighter for some fucking reason");
             throw new NotImplementedException();
         }
     }

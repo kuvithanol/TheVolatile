@@ -12,7 +12,7 @@ namespace TheVolatile
     {
 
         public static bool infBoom = false;
-        public static bool LM = false;
+        public static bool LW = false;
         public static int forcecat = -1;
 
 
@@ -69,8 +69,8 @@ namespace TheVolatile
             }).Register();
 
             new CommandBuilder("LMstart").Run((args) => {
-                LM = !LM;
-                WriteLine("Start in LM: " + LM);
+                LW = !LW;
+                WriteLine("Start in LM: " + LW);
             }).Register();
 
             new CommandBuilder("infLighter").Run((args) => {

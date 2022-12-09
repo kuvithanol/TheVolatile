@@ -8,15 +8,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using MonoMod.Cil;
 
 namespace TheVolatile
 {
     public class SlugbaseVolatile : SlugBaseCharacter
     {
         public static SlugbaseVolatile instance;
-
-
-
         public SlugbaseVolatile() : base("The Volatile", FormatVersion.V1, 0, true)
         {
             instance = this;
@@ -40,7 +38,12 @@ namespace TheVolatile
             On.GameSession.ctor += GameSession_ctor;
             On.ScavengerAI.CollectScore_PhysicalObject_bool += ScavengerAI_CollectScore_PhysicalObject_bool;
 
-            On.HUD.Map.Update += Map_Update;
+            //On.HUD.Map.Update += Map_Update;
+        }
+
+        private void IL_Player_ThrowObject(ILContext il)
+        {
+            throw new NotImplementedException();
         }
 
         private void Player_UpdateAnimation(On.Player.orig_UpdateAnimation orig, Player self)
@@ -71,46 +74,46 @@ namespace TheVolatile
             }
             }
 
-        List<AbstractRoom> spottingJobs = new List<AbstractRoom>();
+        //List<AbstractRoom> spottingJobs = new List<AbstractRoom>();
 
-        private void Map_Update(On.HUD.Map.orig_Update orig, HUD.Map self)
-        {
-            if(spottingJobs.Count > 0) {
-                AbstractRoom absRoom = spottingJobs.Pop();
+        //private void Map_Update(On.HUD.Map.orig_Update orig, HUD.Map self)
+        //{
+        //    if(spottingJobs.Count > 0) {
+        //        AbstractRoom absRoom = spottingJobs.Pop();
 
-                RoomSettings sets = new RoomSettings(absRoom.name, (self.hud.owner as Player).room.world.region, false, false, (self.hud.owner as Player).room.world.game.StoryCharacter);
-                foreach (PlacedObject pObj in sets.placedObjects.Where(x => x.type == EnumExt_Volatile.MountainShrine)) {
-                    challengeSpots.Add(new ChallengeSpot(pObj.pos, absRoom));
-                }
-            }
+        //        RoomSettings sets = new RoomSettings(absRoom.name, (self.hud.owner as Player).room.world.region, false, false, (self.hud.owner as Player).room.world.game.StoryCharacter);
+        //        foreach (PlacedObject pObj in sets.placedObjects.Where(x => x.type == EnumExt_Volatile.MountainShrine)) {
+        //            challengeSpots.Add(new ChallengeSpot(pObj.pos, absRoom));
+        //        }
+        //    }
 
-            orig(self);
+        //    orig(self);
 
-            challengePingCounter++;
-            if (self.hud.owner is Player p && IsMe(p.room?.game) && challengePingCounter == challengePingInterval) {
-                challengePingCounter = 0;
+        //    challengePingCounter++;
+        //    if (self.hud.owner is Player p && IsMe(p.room?.game) && challengePingCounter == challengePingInterval) {
+        //        challengePingCounter = 0;
 
-                foreach (ChallengeSpot challengeSpot in challengeSpots) {
+        //        foreach (ChallengeSpot challengeSpot in challengeSpots) {
 
-                    Vector2 screenPos = self.RoomToMapPos(challengeSpot.pos, challengeSpot.room.index, 1f);
+        //            Vector2 screenPos = self.RoomToMapPos(challengeSpot.pos, challengeSpot.room.index, 1f);
 
-                    if (screenPos.x > 0f && screenPos.x < self.hud.rainWorld.screenSize.x && screenPos.y > 0f && screenPos.y < self.hud.rainWorld.screenSize.y) {
+        //            if (screenPos.x > 0f && screenPos.x < self.hud.rainWorld.screenSize.x && screenPos.y > 0f && screenPos.y < self.hud.rainWorld.screenSize.y) {
 
-                        Vector2 texturePos = self.OnTexturePos(challengeSpot.pos, challengeSpot.room.index, true) / self.DiscoverResolution;
+        //                Vector2 texturePos = self.OnTexturePos(challengeSpot.pos, challengeSpot.room.index, true) / self.DiscoverResolution;
 
-                        if (self.revealTexture.GetPixel((int)texturePos.x, (int)texturePos.y).r == 1f) {
-                            var swarmCircle = new Map.SwarmCircle(self, challengeSpot.pos, challengeSpot.room.index);
-                            self.swarmCircles.Add(swarmCircle);
-                            swarmCircle.circle.color = 1;
-                        }
-                    }
-                }
-            }
-        }
+        //                if (self.revealTexture.GetPixel((int)texturePos.x, (int)texturePos.y).r == 1f) {
+        //                    var swarmCircle = new Map.SwarmCircle(self, challengeSpot.pos, challengeSpot.room.index);
+        //                    self.swarmCircles.Add(swarmCircle);
+        //                    swarmCircle.circle.color = 1;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
-        static int challengePingCounter = 0;
-        const int challengePingInterval = 25;
-        static List<ChallengeSpot> challengeSpots = new List<ChallengeSpot>();
+        //static int challengePingCounter = 0;
+        //const int challengePingInterval = 25;
+        //static List<ChallengeSpot> challengeSpots = new List<ChallengeSpot>();
 
         private SharedPhysics.CollisionResult SharedPhysics_TraceProjectileAgainstBodyChunks(On.SharedPhysics.orig_TraceProjectileAgainstBodyChunks orig, SharedPhysics.IProjectileTracer projTracer, Room room, Vector2 lastPos, ref Vector2 pos, float rad, int collisionLayer, PhysicalObject exemptObject, bool hitAppendages)
         {
@@ -138,7 +141,7 @@ namespace TheVolatile
         {
             orig(self, game);
             CustomAtlases.FetchAtlas("Slimes");
-            CustomAtlases.FetchAtlas("Shrines");
+            //CustomAtlases.FetchAtlas("Shrines");
         }
 
         private void Player_SlugcatGrab(On.Player.orig_SlugcatGrab orig, Player self, PhysicalObject obj, int graspUsed)
@@ -155,7 +158,7 @@ namespace TheVolatile
 
         private int Player_Grabability(On.Player.orig_Grabability orig, Player self, PhysicalObject obj)
         {
-            if (obj is Lighter l && Lighter.getMine(self) != l) {
+            if (obj is Lighter l && !IsMe(self) && Lighter.getMine(self) != l) {
                 return 0;
             }
             return orig(self, obj);
@@ -196,9 +199,9 @@ namespace TheVolatile
             if (IsMe(self)) {
                 self.bounce = 0.4f;
 
-                foreach (AbstractRoom absRoomName in self.room.world.abstractRooms) {
-                    spottingJobs.Add(absRoomName);
-                }
+                //foreach (AbstractRoom absRoomName in self.room.world.abstractRooms) {
+                //    spottingJobs.Add(absRoomName);
+                //}
             }
         }
 
@@ -227,29 +230,39 @@ namespace TheVolatile
         {
             orig(self, eu);
             if (IsMe(self)) {
-                Lighter l = Lighter.getMine(self);
+
+                Lighter lighter = Lighter.getMine(self);
+
                 if (self.animation == Player.AnimationIndex.BellySlide) {
                     self.animation = Player.AnimationIndex.Roll;
                 }
 
-                if (l == null) {
+                if (lighter == null) {
                     AbstractLighter abstractLighter = new AbstractLighter(self.room.world, null, self.abstractCreature.pos, self.room.world.game.GetNewID(), self);
                     abstractLighter.RealizeInRoom();
+
+                    //Debug.Log("lighter realized");
 
                     self.abstractCreature.stuckObjects.Add(new LighterStick(self.abstractPhysicalObject, abstractLighter));
 
                 } else {
 
-                    if (self.room.abstractRoom.name == "SB_L01") {
-                        l.Destroy();
-                    }
+                    //Debug.Log("lighter found");
 
-                    if (l != null && (!(self.grasps[0]?.grabbed == l || self.grasps[1]?.grabbed == l))) {
+                    if (self.room.abstractRoom.name == "SB_L01") {
+                        lighter.Destroy();
+
+                        //Debug.Log("lighter destroyed in ending");
+                    } // destroys the lighter during the ending, as it would cause the player to get stuck in real geometry due to some ending silliness
+
+                    if (lighter != null && lighter.grabbedBy.Count == 0) {
                         Vector2 playerLoc = self.firstChunk.pos;
-                        Vector2 lighterLoc = l.firstChunk.pos;
+                        Vector2 lighterLoc = lighter.firstChunk.pos;
                         float ropeLength = 40f;
                         float elasticity = 0.2f;
-                        float dist = Vector2.Distance(self.bodyChunks[1].pos, l.firstChunk.pos);
+                        float dist = Vector2.Distance(self.bodyChunks[1].pos, lighter.firstChunk.pos);
+
+                        //Debug.Log("consts set");
 
                         if (dist < 20) {
                             elasticity = 0;
@@ -258,46 +271,45 @@ namespace TheVolatile
                             dist -= ropeLength;
                             elasticity *= 1 + dist * 0.5f;
                         }
-                        if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown)
+                        if (self.animation == Player.AnimationIndex.Roll && lighter.mode != Weapon.Mode.Thrown)
                             elasticity += 1 + elasticity * 2;
 
-                        float ratio = self.bodyChunks[1].mass / (l.firstChunk.mass + self.bodyChunks[1].mass);
+                        //Debug.Log("elast set");
+
+                        float ratio = self.bodyChunks[1].mass / (lighter.firstChunk.mass + self.bodyChunks[1].mass);
                         Vector2 motionDir = Custom.DirVec(playerLoc, lighterLoc);
-                        self.firstChunk.pos += motionDir * (1f - ratio) * elasticity * 0.2f;
                         self.firstChunk.vel += motionDir * (1f - ratio) * elasticity * 0.2f;
                         motionDir = Custom.DirVec(lighterLoc, playerLoc);
-                        l.firstChunk.pos += motionDir * ratio * elasticity;
-                        l.firstChunk.vel += motionDir * ratio * elasticity;
-                    } //  /\ floobert shit /\
+                        lighter.firstChunk.vel += motionDir * ratio * elasticity;
+                        //Debug.Log("motions done");
 
-                    if (self.animation == Player.AnimationIndex.Roll && l.mode != Weapon.Mode.Thrown && Vector2.Distance(l.firstChunk.pos, self.firstChunk.pos) < 20) {
-                        bool q = false;
-                        if (self.grasps[0]?.grabbed == null && self.grasps[1]?.grabbed != l) { self.Grab(l, 0, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; } else if (self.grasps[1]?.grabbed == null && self.grasps[0]?.grabbed != l) { self.Grab(l, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false); q = true; }
 
-                        if (q && (self.room.game.IsArenaSession || (self.room.game.session is StoryGameSession sgs && sgs.saveState.deathPersistentSaveData.theMark))) { l.timeSinceClick = 20; l.activateBladeMode(); }
-                    }
+                        //Debug.Log("lighter moved according to the floobert's wisdom");
+                    } // controls the elasticity of the lighter's position
 
-                    if (self.animation == Player.AnimationIndex.RocketJump) {
-                        if (l.bladeMode)
-                            l.room.PlaySound(SoundID.Spear_Bounce_Off_Wall, l.firstChunk, false, 1f, .8f);
-                        l.bladeMode = false;
+                    if (self.animation == Player.AnimationIndex.Roll && lighter.mode != Weapon.Mode.Thrown && Vector2.Distance(lighter.firstChunk.pos, self.firstChunk.pos) < 20) {
+                        
+                        if (self.grasps[0]?.grabbed == null && self.grasps[1]?.grabbed != lighter) { self.Grab(lighter, 0, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false);} else if (self.grasps[1]?.grabbed == null && self.grasps[0]?.grabbed != lighter) { self.Grab(lighter, 1, 0, Creature.Grasp.Shareability.CanNotShare, 1, true, false);}
+                        // tries to autograb the lighter while rolling
                     }
 
                     if (self.rollCounter >= 10 && self.animation == Player.AnimationIndex.Roll) {
-                        if (l.rollRep >= 2) {
-                            l.rollRep = 0;
+                        if (lighter.rollRep == 2) {
+                            lighter.rollRep = 0;
                         } else {
-                            l.rollRep++;
+                            lighter.rollRep++;
                             self.rollCounter--;
                         }
-                    }
+
+                        //Debug.Log("somethign happened with rolling");
+                    } // i think this extends the roll duration by *1.333, by deducting rollcounter every 3(?) ticks
                 }
-                { // \/ food size shit \/
+                {
                     float foodFactor;
                     if (!self.room.game.IsArenaSession)
                         foodFactor = Mathf.Lerp(0.5f, 1.0f, (float)(self.FoodInStomach) / (float)(self.MaxFoodInStomach) + .4f);
                     else
-                        foodFactor = 1f;
+                        foodFactor = .8f;
 
 
                     self.bounce = .4f;
@@ -318,7 +330,7 @@ namespace TheVolatile
 
                     self.bodyChunks[0].mass = foodFactor * 0.4f;
                     self.bodyChunks[1].mass = foodFactor * 0.3f;
-                }
+                } // controls the player's sizes based on food amount
             }
         }
 
@@ -407,23 +419,23 @@ namespace TheVolatile
             orig(self, sLeaser, rCam);
 
             if (IsMe(self.player)) {
-                FContainer fContainer = new FContainer {
+                FContainer slimeContainer = new FContainer {
                     data = "slime"
-                };
+                }; 
 
-                int i = 0; foreach (FSprite vSprite in sLeaser.sprites) {
+                foreach (FSprite vSprite in sLeaser.sprites) {
                     FSprite mSprite = new FSprite(vSprite.element);
 
                     mSprite.color = volatileColor(self.player, LorO.Outline);
                     mSprite.SetPosition(vSprite.GetPosition());
-                    fContainer.AddChild(mSprite);
-                    i++;
+                    slimeContainer.AddChild(mSprite);
                 }
                 if (sLeaser.containers == null)
                     sLeaser.containers = new FContainer[1];
                 else
                     Array.Resize(ref sLeaser.containers, sLeaser.containers.Length + 1);
-                sLeaser.containers[sLeaser.containers.Length - 1] = fContainer;
+
+                sLeaser.containers[sLeaser.containers.Length - 1] = slimeContainer;
 
                 TriangleMesh tailMesh = new TriangleMesh("Outline" + idstring(self.player.playerState.playerNumber), (sLeaser.sprites[2] as TriangleMesh).triangles, true);
                 for (int j = tailMesh.vertices.Length - 1; j >= 0; j--) {
@@ -462,7 +474,7 @@ namespace TheVolatile
             }
         }
 
-        public override string StartRoom => !SlimeConsole.LM ? "GW_S06" : "LW_A12";
+        public override string StartRoom => !SlimeConsole.LW ? "GW_S06" : "LW_A12";
 
         public override string Description => "this cat is s";
 
@@ -572,19 +584,19 @@ namespace TheVolatile
 
 
             if (room.abstractRoom.name != StartRoom) return;
-            if (SlimeConsole.LM) room.AddObject(new SlimeStart(room));
+            if (SlimeConsole.LW) room.AddObject(new SlimeStart(room));
         }
     }
     
-    public struct ChallengeSpot
-    {
-        public Vector2 pos;
-        public AbstractRoom room;
+    //public struct ChallengeSpot
+    //{
+    //    public Vector2 pos;
+    //    public AbstractRoom room;
 
-        public ChallengeSpot(Vector2 vec2, AbstractRoom absR)
-        {
-            pos = vec2;
-            room = absR;
-        }
-    }
+    //    public ChallengeSpot(Vector2 vec2, AbstractRoom absR)
+    //    {
+    //        pos = vec2;
+    //        room = absR;
+    //    }
+    //}
 }
