@@ -26,12 +26,13 @@ namespace TheVolatile
             On.PlayerGraphics.InitiateSprites += PlayerGraphics_InitiateSprites;
             On.PlayerGraphics.DrawSprites += PlayerGraphics_DrawSprites;
             On.PlayerGraphics.AddToContainer += PlayerGraphics_AddToContainer;
-            //IL.Player.ThrowObject += IL_Player_ThrowObject;
             On.Player.ReleaseGrasp += Player_ReleaseGrasp;
             On.Player.CanBeSwallowed += Player_CanBeSwallowed;
             On.Player.Grabability += Player_Grabability;
             On.Player.SlugcatGrab += Player_SlugcatGrab;
             On.Player.UpdateAnimation += Player_UpdateAnimation;
+
+            On.HUD.FoodMeter.ctor += FoodMeter_ctor;
 
             On.SharedPhysics.TraceProjectileAgainstBodyChunks += SharedPhysics_TraceProjectileAgainstBodyChunks;
 
@@ -41,9 +42,12 @@ namespace TheVolatile
             //On.HUD.Map.Update += Map_Update;
         }
 
-        private void IL_Player_ThrowObject(ILContext il)
+        private static void FoodMeter_ctor(On.HUD.FoodMeter.orig_ctor orig, HUD.FoodMeter self, HUD.HUD hud, int maxFood, int survivalLimit)
         {
-            throw new NotImplementedException();
+            orig(self, hud, maxFood, survivalLimit);
+
+            // Bugfix for vanilla.
+            self.quarterPipShower = new FoodMeter.QuarterPipShower(self);
         }
 
         private void Player_UpdateAnimation(On.Player.orig_UpdateAnimation orig, Player self)
@@ -149,6 +153,7 @@ namespace TheVolatile
             orig(self, obj, graspUsed);
             if (IsMe(self) && ((self.room.game.session is ArenaGameSession g && g.ScoreOfPlayer(self, false) < 6) || (self.room.game.IsStorySession && self.FoodInStomach != self.MaxFoodInStomach))) {
                 if (obj is IPlayerEdible icr && !(obj is KarmaFlower) && !(obj is Mushroom) && (!(obj is Creature) || (obj is Creature cr && (cr.dead || cr is Fly || cr is SmallNeedleWorm || (cr is Centipede c && c.Edible))))) {
+                    Lighter.getMine(self).RevealCounter();
                     obj.slatedForDeletetion = true;
                     self.AddFood(icr.FoodPoints);
                     self.room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, obj.firstChunk.pos, 1f, 1.2f);
@@ -249,13 +254,13 @@ namespace TheVolatile
 
                     //Debug.Log("lighter found");
 
-                    if (self.room.abstractRoom.name == "SB_L01") {
+                    if (self.room?.abstractRoom?.name == "SB_L01") {
                         lighter.Destroy();
 
                         //Debug.Log("lighter destroyed in ending");
                     } // destroys the lighter during the ending, as it would cause the player to get stuck in real geometry due to some ending silliness
 
-                    if (lighter != null && lighter.grabbedBy.Count == 0) {
+                    if (lighter.grabbedBy.Count == 0) {
                         Vector2 playerLoc = self.firstChunk.pos;
                         Vector2 lighterLoc = lighter.firstChunk.pos;
                         float ropeLength = 40f;
@@ -461,20 +466,20 @@ namespace TheVolatile
 
         public string idstring(int slugcatCharacter)
         {
-            if (SlimeConsole.forcecat != -1) {
-                slugcatCharacter = SlimeConsole.forcecat;
+            if (OIVars.skinSelection != 0) {
+                slugcatCharacter = OIVars.skinSelection;
             }
             switch (slugcatCharacter) {
-                case 0: return "slime";
-                case 1: return "gup";
-                case 2: return "king";
-                case 3: return "cat";
+                case 1: return "slime";
+                case 2: return "gup";
+                case 3: return "king";
+                case 4: return "cat";
                 default:
                     return "slime";
             }
         }
 
-        public override string StartRoom => !SlimeConsole.LW ? "GW_S06" : "LW_A12";
+        public override string StartRoom => !SlimeConsole.LW ? "LW_A12" : "GW_S06"; 
 
         public override string Description => "this cat is s";
 
@@ -482,24 +487,24 @@ namespace TheVolatile
         public Color volatileColor(Player p, LorO lorO)
         {
             int slugcatCharacter = p.playerState.slugcatCharacter;
-            if (SlimeConsole.forcecat != -1) {
-                slugcatCharacter = SlimeConsole.forcecat;
+            if (OIVars.skinSelection != 0) {
+                slugcatCharacter = OIVars.skinSelection;
             }
 
             if (lorO == LorO.Outline) {
                 switch (slugcatCharacter) {
-                    case 0: return new Color(.3f, .6f, .3f);
-                    case 1: return new Color(1, .9f, .5f);
-                    case 2: return new Color(0, .9f, 1);
-                    case 3: return new Color(.6f, .6f, .5f);
+                    case 1: return new Color(.3f, .6f, .3f);
+                    case 2: return new Color(1, .9f, .5f);
+                    case 3: return new Color(0, .9f, 1);
+                    case 4: return new Color(.6f, .6f, .5f);
                     default: return new Color(.3f, .6f, .3f);
                 }
             } else { //Lighter
                 switch (slugcatCharacter) {
-                    case 0: return new Color(.1f, .3f, .1f);
-                    case 1: return new Color(.1f, .05f, 0);
-                    case 2: return new Color(1, 1, 0);
-                    case 3: return new Color(.1f, .1f, .1f);
+                    case 1: return new Color(.1f, .3f, .1f);
+                    case 2: return new Color(.1f, .05f, 0);
+                    case 3: return new Color(1, 1, 0);
+                    case 4: return new Color(.1f, .1f, .1f);
                     default: return new Color(.1f, .3f, .1f);
                 }
             }
@@ -513,28 +518,28 @@ namespace TheVolatile
 
         public override Color? SlugcatColor(int slugcatCharacter, Color baseColor)
         {
-            if (SlimeConsole.forcecat != -1) {
-                slugcatCharacter = SlimeConsole.forcecat;
+            if (OIVars.skinSelection != 0) {
+                slugcatCharacter = OIVars.skinSelection;
             }
             switch (slugcatCharacter) {
-                case 0: return new Color(.5f, .9f, .5f);
-                case 1: return new Color(1, .75f, 0);
-                case 2: return new Color(0, .7f, 1);
-                case 3: return new Color(.4f, .4f, .4f);
+                case 1: return new Color(.5f, .9f, .5f);
+                case 2: return new Color(1, .75f, 0);
+                case 3: return new Color(0, .7f, 1);
+                case 4: return new Color(.4f, .4f, .4f);
                 default: return new Color(.5f, .9f, .5f);
             }
         }
 
         public override Color? SlugcatEyeColor(int slugcatCharacter)
         {
-            if (SlimeConsole.forcecat != -1) {
-                slugcatCharacter = SlimeConsole.forcecat;
+            if (OIVars.skinSelection != 0) {
+                slugcatCharacter = OIVars.skinSelection;
             }
             switch (slugcatCharacter) {
-                case 0: return new Color(.2f, .5f, .2f);
-                case 1: return new Color(1, .9f, .3f);
-                case 2: return new Color(1, 1, 1);
-                case 3: return new Color(.2f, .2f, .1f);
+                case 1: return new Color(.2f, .5f, .2f);
+                case 2: return new Color(1, .9f, .3f);
+                case 3: return new Color(1, 1, 1);
+                case 4: return new Color(.2f, .2f, .1f);
                 default: return new Color(.2f, .5f, .2f);
             }
         }

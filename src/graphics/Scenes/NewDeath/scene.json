@@ -1,16 +1,16 @@
 {
 	"images": [
 		{
-			"name": "New Death - 2.png",
-			"x": 425,
-			"y": 70,
-			"depth": 3.6
-		},
-		{
 			"name": "New Death - 1.png",
 			"x": 425,
 			"y": 70,
 			"depth": 3.2
+		},
+		{
+			"name": "New Death - 2.png",
+			"x": 425,
+			"y": 70,
+			"depth": 3.6
 		},
 		{
 			"name": "New Death - 3.png",

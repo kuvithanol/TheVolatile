@@ -29,6 +29,7 @@
     <None Remove="graphics\Scenes\NewDeath\New Death - 4.png" />
     <None Remove="graphics\Scenes\NewDeath\New Death - 5.png" />
     <None Remove="graphics\Scenes\NewDeath\New Death - 55.png" />
+    <None Remove="graphics\Scenes\NewDeath\New Death - 6.png" />
     <None Remove="graphics\Scenes\NewDeath\scene.json" />
     <None Remove="graphics\Scenes\SelectMenuAscended\Ghost.png" />
     <None Remove="graphics\Scenes\SelectMenuAscended\Glow.png" />
@@ -96,11 +97,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="graphics\Scenes\NewDeath\New Death - 6.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\DragonSlayer\Refs\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx">
       <HintPath>..\..\DragonSlayer\Refs\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="ConfigMachine">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Rain World\BepInEx\realm\backups\ConfigMachine.dll</HintPath>
     </Reference>
     <Reference Include="DevConsole">
       <HintPath>..\..\DragonSlayer\Refs\DevConsole.dll</HintPath>

@@ -1,5 +1,6 @@
 ﻿using Fisobs.Core;
 using Fisobs.Sandbox;
+using HUD;
 using Noise;
 using RWCustom;
 using System;
@@ -86,7 +87,7 @@ namespace TheVolatile
                 open = false;
             }  // manages the open and closed state of the lighter, as well as vfx for it
 
-            if (open && player.FoodInStomach > 0 && timeSinceUsed >= 10) {
+            if (open && (GetFood(player) > 0 && timeSinceUsed >= 10)) {
                 lit = true;
             } else {
                 timeSinceUsed++;
@@ -97,7 +98,7 @@ namespace TheVolatile
 
 
 
-            if (Plugin.r.Next(7) <= (int)semiCost && lit) {
+            if (Plugin.r.Next(7) <= 3 && lit) {
                 room.AddObject(new HolyFire.HolyFireSprite(firstChunk.pos + new Vector2(0, 4)));
             }  // randomly adds holyfire particles to lighter, when appropriate
 
@@ -117,7 +118,7 @@ namespace TheVolatile
                 this.room.AddObject(this.lightSource);
             } else {
                 this.lightSource.setPos = new Vector2?(base.firstChunk.pos);
-                this.lightSource.setRad = new float?((70f + ((int)semiCost + 2) * 20f) * this.flicker[0, 0]);
+                this.lightSource.setRad = new float?(100 * this.flicker[0, 0]);
                 this.lightSource.setAlpha = lit ? new float?(1f) : 0;
                 if (this.lightSource.slatedForDeletetion || this.lightSource.room != this.room) {
                     this.lightSource = null;
@@ -126,43 +127,21 @@ namespace TheVolatile
             #endregion
         }
 
-        enumSemicost semiCost = Lighter.enumSemicost.no;
-        enum enumSemicost
-        {
-            no = 7,
-            notYet = 3,
-            NOW = 1
-        }
-        public bool semiCostIncrement()
-        {
-            if (semiCost == enumSemicost.no) {
-                semiCost = enumSemicost.notYet;
-
-            } else if (semiCost == enumSemicost.notYet) { 
-                semiCost = enumSemicost.NOW;
-
-            } else { 
-                semiCost = enumSemicost.no;
-
-                return true;
-            }
-            return false;
-        }
-
         public override void Thrown(Creature thrownBy, Vector2 thrownPos, Vector2? firstFrameTraceFromPos, IntVector2 throwDir, float frc, bool eu)
         {
             timeSinceUsed = 0;
             if (!lit)
                 base.Thrown(thrownBy, thrownPos, firstFrameTraceFromPos, throwDir, frc * 1.3f, eu);
             else {
-                if(!SlimeConsole.infBoom)
-                if (player.superLaunchJump < 20)
-                    splode();
-                else bigSplode();
+                if (!SlimeConsole.infBoom)
+                    if (player.superLaunchJump > 20 && player.FoodInStomach > 0)
+                        BigExplosion();
+                    else
+                        SmallExplosion();
             }
         }
 
-        private void bigSplode()
+        private void BigExplosion()
         {
             Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
 
@@ -178,7 +157,7 @@ namespace TheVolatile
 
 
             if (!SlimeConsole.infBoom)
-                reduceFood();
+                RemoveFullPip();
 
             room.PlaySound(SoundID.Bomb_Explode, pos, 0.85f, 1.05f);
             room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 4.5f, 0.7f);
@@ -186,7 +165,7 @@ namespace TheVolatile
             room.InGameNoise(new InGameNoise(firstChunk.pos, 12000f, player, 1f));
         }
 
-        private void splode()
+        private void SmallExplosion()
         {
             Vector2 pos = Vector2.Lerp(player.bodyChunks[0].pos, player.bodyChunks[1].pos, 0.5f);
 
@@ -197,18 +176,17 @@ namespace TheVolatile
             else
                 pos -= new Vector2(X, Y) * 10f;
 
-            room.AddObject(new Explosion(room, null, pos, 2, 40, 5, 0, 0, 0, player, 0, 0, 0));
+            room.AddObject(new Explosion(room, null, pos, 2, 35, 4, 0, 0, 0, player, 0, 0, 0));
             room.AddObject(new ExplosionSpikes(room, pos, 10, 0.5f, 2, 5, 15, SlugbaseVolatile.instance.volatileColor(player, 0)));
             room.AddObject(new Explosion.ExplosionLight(pos, 280f, 0.7f, 7, SlugbaseVolatile.instance.volatileColor(player, 0)));
             room.AddObject(new Explosion.FlashingSmoke(pos, new Vector2(0, 1), 1, SlugbaseVolatile.instance.volatileColor(player, 0), SlugbaseVolatile.instance.SlugcatColor(player.playerState.playerNumber, Color.white) ?? Color.white, UnityEngine.Random.Range(3, 11)));
             room.AddObject(new SootMark(room, pos, 50, false));
 
-            if (semiCostIncrement()) {
-                if (!SlimeConsole.infBoom)
-                    reduceFood();
-                room.PlaySound(SoundID.Bomb_Explode, pos, 0.5f, 1.15f);
-            } else
-                room.PlaySound(SoundID.Bomb_Explode, pos, 0.4f, 1.2f);
+            if (!SlimeConsole.infBoom)
+                RemoveQuarterPip();
+
+
+            room.PlaySound(SoundID.Bomb_Explode, pos, 0.4f, 1.2f);
             room.PlaySound(SoundID.Slime_Mold_Terrain_Impact, pos, 3.5f, 0.8f);
 
             room.InGameNoise(new InGameNoise(firstChunk.pos, 6000f, player, .8f));
@@ -236,14 +214,66 @@ namespace TheVolatile
             return true;
         }
 
-        void reduceFood()
+        float GetFood(Player plr) => plr.playerState.foodInStomach + 0.25f * plr.playerState.quarterFoodPoints;
+
+        void SetFood(Player plr, HUD.FoodMeter foodMeter, float pips)
         {
-            if (!SlimeConsole.infBoom) { 
-            player.AddFood(-1);
-            foreach (var cam in player.room.game.cameras)
-                if (cam.hud.owner == player && cam.hud.foodMeter is HUD.FoodMeter fm && fm.showCount > 0)
-                    fm.circles[--fm.showCount].EatFade();
+            int fullPips = Mathf.FloorToInt(pips);
+            int quarterPips = Mathf.FloorToInt(4 * (pips - fullPips));
+
+            Debug.Log($"{fullPips} {quarterPips}");
+
+            // These get overridden later
+            plr.playerState.foodInStomach = fullPips;
+            plr.playerState.quarterFoodPoints = quarterPips;
+            foodMeter.quarterPipShower.displayQuarterFood = quarterPips;
+
+            while (foodMeter.showCount > fullPips) {
+                foodMeter.showCount--;
+
+                var pip = foodMeter.circles[foodMeter.showCount];
+                pip.eatCounter = 50;
+                pip.eaten = true;
+                pip.rads[0, 0] = pip.circles[0].snapRad + 1.5f;
+                pip.rads[0, 1] += 0.6f;
             }
+
+            while (foodMeter.showCount < fullPips) {
+                var pip = foodMeter.circles[foodMeter.showCount];
+                pip.foodPlopped = true;
+                pip.rads[0, 0] = pip.circles[0].snapRad + 1.5f;
+                pip.rads[0, 1] += 0.6f;
+
+                foodMeter.showCount++;
+            }
+        }
+
+        void RemoveFullPip()
+        {
+            foreach (var cam in player.room.game.cameras)
+                if (cam.hud.owner == player && cam.hud.foodMeter is HUD.FoodMeter fm && fm.showCount > 0) {
+
+                    float pipsAfterJump = GetFood(player) - 1f;
+                    SetFood(player, fm, pipsAfterJump);
+                }
+        }
+
+        void RemoveQuarterPip()
+        {
+            foreach (var cam in player.room.game.cameras)
+                if (cam.hud.owner == player && cam.hud.foodMeter is HUD.FoodMeter fm && fm.showCount > 0) {
+
+                    float pipsAfterJump = GetFood(player) - 0.25f;
+                    SetFood(player, fm, pipsAfterJump);
+                }
+        }
+
+        public void RevealCounter()
+        {
+            foreach (var cam in player.room.game.cameras)
+                if (cam.hud.owner == player && cam.hud.foodMeter is HUD.FoodMeter fm && fm.showCount > 0) {
+                    fm.visibleCounter = 100;
+                }
         }
 
         float[,] flicker;
@@ -282,9 +312,9 @@ namespace TheVolatile
                     Vector2 haver = Vector2.Lerp(A, B, i/7f);
 
                     /*top*/
-                    mesh.MoveVertice(i * 2, (haver + sagPer(i) * bonus * new Vector2(0,-20)) + (perpTheta * 10 * plumpPer(i) * bonus));
+                    mesh.MoveVertice(i * 2, (haver + SagPer(i) * bonus * new Vector2(0,-20)) + (perpTheta * 10 * PlumpPer(i) * bonus));
                     /*bot*/
-                    mesh.MoveVertice(i * 2 + 1, (haver + sagPer(i) * bonus * new Vector2(0, -20)) - (perpTheta * 10 * plumpPer(i) * bonus));
+                    mesh.MoveVertice(i * 2 + 1, (haver + SagPer(i) * bonus * new Vector2(0, -20)) - (perpTheta * 10 * PlumpPer(i) * bonus));
                 }
                 mesh.MoveBehindOtherNode(playerLeaser.sprites[9]);
 
@@ -302,9 +332,17 @@ namespace TheVolatile
             if (slatedForDeletetion || room != rCam.room) {
                 sLeaser.CleanSpritesAndRemove();
             }
+
+            if (this.blink > 0) {
+                if (this.blink > 1 && UnityEngine.Random.value < 0.5f) {
+                    sLeaser.sprites[0].color = base.blinkColor;
+                } else {
+                    sLeaser.sprites[0].color = this.color;
+                }
+            }
         }
 
-        float sagPer(int i)
+        float SagPer(int i)
         {
             switch (i) {
                 case 0:
@@ -322,7 +360,7 @@ namespace TheVolatile
                 default: return 0;
             }
         }
-        float plumpPer(int i)
+        float PlumpPer(int i)
         {
             switch (i) {
                 case 0:

@@ -8,6 +8,7 @@ using SlugBase;
 using UnityEngine;
 using Fisobs.Items;
 using Fisobs.Core;
+using OptionalUI;
 
 namespace TheVolatile
 {
@@ -16,14 +17,21 @@ namespace TheVolatile
     {
         public static System.Random r = new System.Random();
         public static ManualLogSource logger;
+        public OptionInterface LoadOI() => new SlimeOI(this);
+        public static Plugin instance;
+
+
         public void OnEnable()
         {
             On.RainWorld.Start += RainWorld_Start;
             On.Room.ctor += Room_ctor;
             Content.Register(new Fisob[] { FisLighter.Instance });
+            instance = this;
 
             SlimeConsole.Apply();
             //PlacedObs.PlacedObs.Apply();
+
+            
         }
 
         public void OnDisable()
